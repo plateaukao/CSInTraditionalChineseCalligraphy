@@ -4,22 +4,19 @@ import cv2
 import os
 import numpy as np
 from shutil import copyfile, move
-from utils.Functions import getSingleMaxBoundingBoxOfImage
+from utils.Functions import getSingleMaxBoundingBoxOfImage, calculateSSIM, calculateCoverageRate
 
 from StrokesClassification.stroke_pattern import check_heng_pattern
 
-path = '/Users/liupeng/Documents/Data/Strokes_png_test/丄_4E04_0.png'
+# template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/classification/long_heng.png'
+template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images/与_4E0E_1.png'
+path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images/丐_4E10_3.png'
 
 img = cv2.imread(path, 0)
 
-if img is None:
-    print("img is None")
+temp_img = cv2.imread(template_path, 0)
 
-x, y, w, h = getSingleMaxBoundingBoxOfImage(img)
-print(w, h, (h / w))
+cr = calculateCoverageRate(temp_img, img)
+ssim = calculateSSIM(temp_img, img)
 
-# area ratio
-black_area = np.sum((255 - np.array(img, dtype=np.uint8)) / 255)
-total_area = w * h
-
-print(black_area / total_area)
+print("cr: %0.3f , ssim: %0.3f" % (cr, ssim))
