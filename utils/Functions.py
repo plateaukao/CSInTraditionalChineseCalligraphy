@@ -1828,6 +1828,20 @@ def createBlankGrayscaleImage(image):
     return img
 
 
+def createBlankGrayscaleImageWithSize(size):
+    """
+    Create blank grayscale image based on the reference image shape.
+    :param image:
+    :return:
+    """
+
+    img = np.ones(size) * 255
+    img = np.array(img, dtype=np.uint8)
+
+    return img
+
+
+
 def createBlankRGBImage(image):
     """
     Create blank RGB image based on the reference image shape.

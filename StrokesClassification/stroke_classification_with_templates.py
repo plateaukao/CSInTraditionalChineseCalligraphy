@@ -8,11 +8,12 @@ from utils.Functions import calculateSSIM, calculateCoverageRate
 
 
 def main():
-    images_path = '//home/liupeng/Documents/Data/stroke_classification_dataset/images'
-    template_path = '//home/liupeng/Documents/Data/stroke_classification_dataset/classification/long_heng.png'
+    images_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images'
+    template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/classification/pieshang.png'
 
     temp_saved_path = template_path.replace('.png', '')
     if not os.path.exists(temp_saved_path):
+        print("not exist")
         os.mkdir(temp_saved_path)
 
     image_names = [f for f in os.listdir(images_path) if '.png' in f]
@@ -34,11 +35,89 @@ def main():
         cr = calculateCoverageRate(temp_img, img_)
         ssim = calculateSSIM(temp_img, img_)
 
-        if ssim > 0.93:
+        # pie shang
+        if ssim > 96.2:
             shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # na
+        # if ssim > 92.8 and cr > 58.4:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # pie 2
+        # if ssim > 95.4:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # # pie
+        # if ssim > 92.5 and cr > 32:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+
+        # chang heng
+        # if ssim > 97.2:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # # pie dian
+        # if ssim > 97.3:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # zhong heng
+        # if ssim > 96.5 and cr > 74.3:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # duan heng
+        # if ssim > 97.5:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+
+        # chang dian
+        # if ssim > 96 and cr > 58:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # shugou
+        # if ssim > 93 and cr > 90:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # shuhengzhegou
+        # if ssim > 89.5:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # heng
+        # if ssim > 93.4:
+        #     # shutil.copy2(img_path, os.path.join(temp_saved_path, image_names[i]))
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # shu
+        # if ssim > 94.5:
+        #     # shutil.copy2(img_path, os.path.join(temp_saved_path, image_names[i]))
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # pie
+        # if ssim > 94:
+        #     # shutil.copy2(img_path, os.path.join(temp_saved_path, image_names[i]))
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # na
+        # if ssim > 94:
+        #     shutil.copy2(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # dian
+        # if ssim > 98.5:
+        #     # shutil.copy2(img_path, os.path.join(temp_saved_path, image_names[i]))
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # chagn pie
+        # if ssim > 92 and cr > 52:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
+
+        # pieti
+        # if ssim > 90 and cr > 30:
+        #     shutil.move(img_path, os.path.join(temp_saved_path, image_names[i]))
 
         if i % 1000 == 0:
             print("cr: %0.3f , ssim: %0.3f" % (cr, ssim))
+
+        # if i == 10000:
+        #     break
 
     end = time.time()
     print('Process time: ', (end - start))
