@@ -8,9 +8,9 @@ from utils.Functions import getSingleMaxBoundingBoxOfImage, calculateSSIM, calcu
 
 from StrokesClassification.stroke_pattern import check_heng_pattern
 
-template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/classification/pieshang.png'
+template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/classification/hengzheshu2.png'
 # template_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images/与_4E0E_1.png'
-path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images/乇_4E47_0.png'
+path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/images/毆_6BC6_2.png'
 
 img = cv2.imread(path, 0)
 
