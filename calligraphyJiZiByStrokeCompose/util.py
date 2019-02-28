@@ -86,9 +86,13 @@ def query_taget_strokes(type, position, library_path="../../../Data/Stroke_recom
     return target_strokes_path
 
 
-def stroke_recompose(input):
+def query_char_info(input):
     # remove invalid characters in input
     input = input.replace(' ', '').replace('\n', '').replace('\t', '')
+
+    if input == "":
+        print("Input content should not be None!")
+        return []
 
     # reterival xml to find character info
     xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
@@ -96,7 +100,7 @@ def stroke_recompose(input):
     tree = ET.parse(xml_path)
     if tree is None:
         print("tree is none!")
-        return
+        return []
 
     root = tree.getroot()
     print("root len:", len(root))
@@ -144,8 +148,10 @@ def stroke_recompose(input):
         # create ChineseCharacter object
         cc_obj = ChineseCharacter(tag, u_code, stroke_orders, stroke_position)
         char_info_list.append(cc_obj)
+    return char_info_list
 
-    # search for the template stroke from the library
+
+def query_char_target_strokes(char_info_list):
     char_target_strokes_list = []
     for cc in char_info_list:
         print(cc.tag, cc.u_code, cc.stroke_orders, cc.stroke_position)
@@ -158,15 +164,12 @@ def stroke_recompose(input):
                 print(cc.tag, "stroke ", i, "not fond target strokes")
 
         char_target_strokes_list.append(target_strokes)
-    print(char_target_strokes_list)
+    return char_target_strokes_list
 
-    # recompose strokes
-    if len(char_target_strokes_list) == len(char_info_list):
-        print("img and chars are same length")
-    else:
-        print("img and chars are not same length")
 
-    save_path = "../../../Data/Stroke_recomposed_tool/generated_results"
+def stroke_recompose(char_info_list, char_target_strokes_list):
+    generated_result = []
+
     for i in range(len(char_info_list)):
         ch_obj = char_info_list[i]
         ch_stroke_imgs = char_target_strokes_list[i]
@@ -189,15 +192,9 @@ def stroke_recompose(input):
                 # only copy the valid pixels
                 for x_ in range(rect_[2]):
                     for y_ in range(rect_[3]):
-                        if img_[rect_[1]+y_][rect_[0]+x_] == 0:
-                            bk[cent_y0-int(rect_[3]/2)+72+y_][cent_x0-int(rect_[2]/2)+72+x_] = img_[rect_[1]+y_][rect_[0]+x_]
+                        if img_[rect_[1] + y_][rect_[0] + x_] == 0:
+                            bk[cent_y0 - int(rect_[3] / 2) + 72 + y_][cent_x0 - int(rect_[2] / 2) + 72 + x_] = \
+                            img_[rect_[1] + y_][rect_[0] + x_]
+        generated_result.append(bk)
 
-        cv2.imwrite(os.path.join(save_path, ch_obj.tag + "_" + ch_obj.u_code + ".png"), bk)
-
-
-
-if __name__ == '__main__':
-    input = "链接啊剋觉得分开就开始"
-    stroke_recompose(input)
-    # target_strokes = query_taget_strokes('点', [107, 9, 40, 32])
-    # print(target_strokes)
+    return generated_result
