@@ -10,19 +10,22 @@ def stroke_create():
     """
         根据200个汉字的SVG文件，创建基本笔画库。 格式： 字_unicode_strokenumber.png
     """
-    source_path = "../../../Data/Stroke_recomposed_tool/200svg chars dataset"
-    save_path = "../../../Data/Stroke_recomposed_tool/200svg strokes dataset"
+    source_path = "../../../Data/Stroke_recomposed_tool/chars dataset"
+    save_path = "../../../Data/Stroke_recomposed_tool/strokes dataset"
+
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
 
     # if not os.path.exists(save_path):
     #     os.mkdir(save_path)
 
     # directory structure:  stroke_type/stroke.png
-    stroke_types = ["卧钩", "横", "横折横折", "竖折", "弯钩", "横勾", "横折钩", "竖折折钩", "捺", "横折", "横撇", "竖折撇", "提",
-                    "横折弯钩", "横撇弯钩", "竖折竖", "撇", "横折折折钩", "点", "竖提", "撇折", "横折折撇", "竖", "竖钩", "撇点",
-                    "横折提", "竖弯", "斜钩", "横折横", "竖弯钩"]
+    stroke_types = ["卧钩", "横勾", "横折横折", "竖折", "弯钩", "横折", "横折钩", "竖折折钩", "捺", "横折弯", "横撇",
+                    "竖折撇", "提", "横折弯钩", "横撇弯钩", "竖折竖", "撇", "横折折折", "横斜钩", "竖提", "撇折",
+                    "横折折折钩", "点", "竖钩", "撇点", "横折折撇", "竖", "斜钩", "横折提", "竖弯", "横", "横折横", "竖弯钩"]
 
-    # for s in stroke_types:
-    #     os.mkdir(os.path.join(save_path, s))
+    for s in stroke_types:
+        os.mkdir(os.path.join(save_path, s))
 
     all_char_stroke_dict = {}
     xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"

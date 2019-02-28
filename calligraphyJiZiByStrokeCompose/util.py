@@ -8,7 +8,7 @@ import cv2
 from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscaleImageWithSize
 
 
-def query_taget_strokes(type, position, library_path="../../../Data/Stroke_recomposed_tool/200svg strokes dataset"):
+def query_taget_strokes(type, position, library_path="../../../Data/Stroke_recomposed_tool/strokes dataset"):
     """
     Query target strokes from library based on the stroke type and position(x, y, w, h).
     :param type:

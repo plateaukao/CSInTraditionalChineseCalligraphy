@@ -13,7 +13,7 @@ from calligraphyJiZiByStrokeCompose.util import query_char_info, query_char_targ
 
 
 class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
-    __library_path = "../../../Data/Stroke_recomposed_tool/200svg strokes dataset"
+    __library_path = "../../../Data/Stroke_recomposed_tool/strokes dataset"
     __xml_dataset_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
     __input_content = ""
     __chars_info_list = []

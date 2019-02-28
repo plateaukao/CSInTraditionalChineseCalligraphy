@@ -37,10 +37,12 @@ def add_stroke_order_to_XML():
             img_names_diff.append(s)
     print(len(img_names_diff))
 
-    # img_diff_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/img_diff'
+    img_diff_path = '/Users/liupeng/Documents/Data/stroke_classification_dataset/img_diff'
+    if not os.path.exists(img_diff_path):
+        os.mkdir(img_diff_path)
 
-    # for s in img_names_diff:
-    #     shutil.copy2(os.path.join(all_imgs_path, s), img_diff_path)
+    for s in img_names_diff:
+        shutil.copy2(os.path.join(all_imgs_path, s), img_diff_path)
 
     xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure.xml"
     save_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
