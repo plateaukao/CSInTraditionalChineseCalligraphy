@@ -62,7 +62,7 @@ def generate_calligraphy_images():
     print('Select chars target stroke time:', timeit.default_timer() - s_time)
 
     s_time = timeit.default_timer()
-    generated_imgs = stroke_recompose(char_info_list, char_target_strokes_list)
+    generated_imgs, _ = stroke_recompose(char_info_list, char_target_strokes_list)
     print("generated images num:", len(generated_imgs))
     print('generation image time:', timeit.default_timer() - s_time)
 

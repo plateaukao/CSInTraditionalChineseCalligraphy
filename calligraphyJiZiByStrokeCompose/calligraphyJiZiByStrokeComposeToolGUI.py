@@ -7,9 +7,12 @@ import numpy as np
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PIL import Image
+from xml.dom import minidom
 
 from calligraphyJiZiByStrokeCompose.mainwindow import Ui_MainWindow
-from calligraphyJiZiByStrokeCompose.util import query_char_info, query_char_target_strokes, stroke_recompose
+from calligraphyJiZiByStrokeCompose.util import query_char_info, query_char_target_strokes, stroke_recompose, \
+                    load_stroke_library_dataset, query_char_info_from_chars_list, query_char_target_stroke_by_dataset
 
 
 class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
@@ -22,8 +25,11 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     __char_target_strokes_list = []
 
     __recomposed_results = []
+    __recomposed_stroke_results = []
 
     __target_char_strokes = []
+
+    __stroke_dataset = None
 
     def __init__(self):
         super(CalligraphyJiZiByStrokeCompse, self).__init__()
@@ -52,9 +58,25 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         self.set_pushButton.clicked.connect(self.handle_setting_btn)
         self.generate_pushButton.clicked.connect(self.handle_generate_btn)
+        self.svg_extraction_pushButton.clicked.connect(self.handle_SVG_extraction_btn)
+
+        self.load_dataset_thread = LoadStrokeDatasetThread()
+
+        self.load_dataset_thread.signal.connect(self.handle_load_dataset_thread)
 
     def handle_setting_btn(self):
         print("Setting button clicked!")
+        # start load dataset thread
+        self.load_dataset_thread.start()
+        self.statusbar.showMessage("Begin to load strokes dataset......")
+
+    def handle_load_dataset_thread(self, dataset):
+        if dataset:
+            self.__stroke_dataset = dataset
+            self.statusbar.showMessage("Load strokes dataset Success!")
+        else:
+            print("Load dataset failed!")
+            self.statusbar.showMessage("Load strokes dataset Failed!")
 
     def handle_generate_btn(self):
         print("Generate button clicked!")
@@ -67,7 +89,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         print(input_conent)
 
         # query chars info list
-        self.__chars_info_list = query_char_info(input_conent)
+        self.__chars_info_list = query_char_info_from_chars_list(input_conent)
         print(self.__chars_info_list)
 
         # add to chars list
@@ -78,10 +100,10 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.chars_tag_slm.setStringList(self.__chars_tag_list)
 
         # query chars target strokes
-        self.__char_target_strokes_list = query_char_target_strokes(self.__chars_info_list)
+        self.__char_target_strokes_list = query_char_target_stroke_by_dataset(self.__stroke_dataset, self.__chars_info_list)
 
         # stroke recompose
-        self.__recomposed_results = stroke_recompose(self.__chars_info_list, self.__char_target_strokes_list)
+        self.__recomposed_results, self.__recomposed_stroke_results = stroke_recompose(self.__chars_info_list, self.__char_target_strokes_list)
 
         # update result gview
         if len(self.__recomposed_results) > 0:
@@ -147,6 +169,85 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             print("Not strokes existing!")
             return
 
+    def handle_SVG_extraction_btn(self):
+        print("SVG extraction button clicked!")
+        if self.__recomposed_stroke_results is None or len(self.__recomposed_stroke_results) == 0:
+            self.statusbar.showMessage("Stroke templates is None")
+            return
+
+        filename = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
+
+        # convert bitmap to svg file
+        temp_path = './temp'
+        if not os.path.exists(temp_path):
+            os.makedirs(temp_path)
+
+        for char_id in range(len(self.__recomposed_stroke_results)):
+            strokes_list = self.__recomposed_stroke_results[char_id]
+
+            svg_content = '<?xml version="1.0" standalone="no"?> <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 20010904//EN" ' \
+                          '"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"> <svg version="1.0" xmlns="http://www.w3.org/2000/svg" ' \
+                          'width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000" preserveAspectRatio="xMidYMid meet"> ' \
+                          '<g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"> \n'
+
+            for stroke_id in range(len(strokes_list)):
+                stroke_img = strokes_list[stroke_id]
+
+                # save narray to png
+                png_img_path = os.path.join(temp_path, self.__chars_info_list[char_id].tag + "_{}.png".format(stroke_id))
+                cv2.imwrite(png_img_path, stroke_img)
+
+                # convert png to bmp
+                bmp_img_path = os.path.join(temp_path, self.__chars_info_list[char_id].tag + "_{}.bmp".format(stroke_id))
+                img_ = Image.open(png_img_path)
+                img_.save(bmp_img_path)
+
+                # convert bmp to svg
+                svg_img_path = os.path.join(temp_path, self.__chars_info_list[char_id].tag + "_{}.svg".format(stroke_id))
+                os.system("potrace  --svg {} -o {}".format(bmp_img_path, svg_img_path))
+
+                # parse svg file to extract path
+                # open svg file
+                dom = minidom.parse(svg_img_path)
+
+                # find path element in original svg file
+                root = dom.documentElement
+                path_elems = root.getElementsByTagName("path")
+                if path_elems is None:
+                    print("not find path elements")
+                    return
+                print("path elements len: ", len(path_elems))
+
+                for i in range(len(path_elems)):
+                    d = path_elems[i].getAttribute('d')
+                    svg_content += '<path d="' + d + '"></path> \n'
+
+                # del temp files
+                os.system('rm {}'.format(png_img_path))
+                os.system('rm {}'.format(bmp_img_path))
+                os.system('rm {}'.format(svg_img_path))
+
+            svg_content += '</g></svg>'
+
+            with open(os.path.join(filename, self.__chars_info_list[char_id].tag + ".svg"), 'w') as f:
+                f.write(svg_content)
+
+        self.statusbar.showMessage("SVG files extracted success!")
+
+
+class LoadStrokeDatasetThread(QThread):
+    signal = pyqtSignal(object)
+
+    def __init__(self):
+        QThread.__init__(self)
+
+    def run(self):
+        dataset = None
+
+        stroke_lib_path = "../../../Data/Stroke_recomposed_tool/strokes dataset"
+        dataset = load_stroke_library_dataset(stroke_lib_path)
+
+        self.signal.emit(dataset)
 
 
 

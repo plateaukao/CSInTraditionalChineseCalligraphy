@@ -352,11 +352,15 @@ def query_char_target_stroke_by_dataset(dataset, char_info_list):
 
 def stroke_recompose(char_info_list, char_target_strokes_list):
     generated_result = []
+    generated_strokes_result = []
 
     for i in range(len(char_info_list)):
         ch_obj = char_info_list[i]
         ch_stroke_imgs = char_target_strokes_list[i]
         bk = createBlankGrayscaleImageWithSize((400, 400))
+
+        # strokes template
+        strokes_temp_imgs = []
 
         # merge all stroke with center alignment
         if len(ch_stroke_imgs) == ch_obj.stroke_orders:
@@ -369,6 +373,11 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
                 img_ = cv2.resize(img_, (256, 256))
                 rect_ = getSingleMaxBoundingBoxOfImage(img_)
 
+                # resize stroke template image
+                s_temp_img = createBlankGrayscaleImageWithSize((400, 400))
+                s_temp_img[72: 72+256, 72: 72+256] = img_
+                strokes_temp_imgs.append(s_temp_img)
+
                 cent_x0 = int(ch_obj.stroke_position[j][0] + ch_obj.stroke_position[j][2] / 2)
                 cent_y0 = int(ch_obj.stroke_position[j][1] + ch_obj.stroke_position[j][3] / 2)
 
@@ -379,8 +388,9 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
                             bk[cent_y0 - int(rect_[3] / 2) + 72 + y_][cent_x0 - int(rect_[2] / 2) + 72 + x_] = \
                             img_[rect_[1] + y_][rect_[0] + x_]
         generated_result.append(bk)
+        generated_strokes_result.append(strokes_temp_imgs)
 
-    return generated_result
+    return generated_result, generated_strokes_result
 
 
 if __name__ == '__main__':

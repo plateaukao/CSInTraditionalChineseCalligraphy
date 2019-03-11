@@ -29,6 +29,9 @@ class Ui_MainWindow(object):
         self.generate_pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.generate_pushButton.setObjectName("generate_pushButton")
         self.verticalLayout.addWidget(self.generate_pushButton)
+        self.svg_extraction_pushButton = QtWidgets.QPushButton(self.verticalLayoutWidget)
+        self.svg_extraction_pushButton.setObjectName("svg_extraction_pushButton")
+        self.verticalLayout.addWidget(self.svg_extraction_pushButton)
         self.result_graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
         self.result_graphicsView.setGeometry(QtCore.QRect(300, 20, 361, 331))
         self.result_graphicsView.setObjectName("result_graphicsView")
@@ -64,6 +67,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
         self.set_pushButton.setText(_translate("MainWindow", "Stroke Library Setting"))
         self.generate_pushButton.setText(_translate("MainWindow", "Generate"))
+        self.svg_extraction_pushButton.setText(_translate("MainWindow", "SVG extraction"))
         self.label.setText(_translate("MainWindow", "Stroke Information:"))
         self.stroke_info_label.setText(_translate("MainWindow", "TextLabel"))
 

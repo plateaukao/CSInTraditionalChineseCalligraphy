@@ -41,6 +41,13 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="svg_extraction_pushButton">
+       <property name="text">
+        <string>SVG extraction</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </widget>
    <widget class="QGraphicsView" name="result_graphicsView">
