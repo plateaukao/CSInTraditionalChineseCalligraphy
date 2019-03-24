@@ -210,10 +210,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         :param qModelIndex:
         :return:
         """
-        print(qModelIndex.row())
-        print(self.target_strokes_treeView.currentIndex().data())
-        print(self.target_strokes_treeView.currentIndex().parent().row())
-
         self.__current_stroke_img_path = self.target_strokes_treeView.currentIndex().data()
 
         if self.__current_stroke_img_path != "":
@@ -230,13 +226,16 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.__stroke_image_id = self.target_strokes_treeView.currentIndex().row()
 
         print(self.__char_id, self.__stroke_id, self.__stroke_image_id)
-        print(self.__recomposed_results_index)
 
         self.__recomposed_results_index[self.__char_id][self.__stroke_id] = self.__stroke_image_id
+        print(self.__recomposed_results_index)
 
         #update the generated result image
-        img_ = render_generated_image(self.__chars_info_list, self.__char_target_strokes_list,\
+        img_, new_strokes_img = render_generated_image(self.__chars_info_list, self.__char_target_strokes_list,\
                                       self.__recomposed_results_index, self.__char_id)
+
+        self.__recomposed_stroke_results[self.__char_id] = new_strokes_img.copy()
+
         qimg_ = QImage(img_.data, img_.shape[1], img_.shape[0], img_.shape[1], QImage.Format_Indexed8)
 
         qimg_pix_ = QPixmap.fromImage(qimg_)
