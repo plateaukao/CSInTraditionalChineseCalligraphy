@@ -22,6 +22,9 @@ def generate_calligraphy_images():
 
     save_path = "../../../Data/1000 generated results"
 
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+
     stroke_lib_path = "../../../Data/Stroke_recomposed_tool/strokes dataset"
     s_time = timeit.default_timer()
     strokes_dataset = load_stroke_library_dataset(stroke_lib_path)

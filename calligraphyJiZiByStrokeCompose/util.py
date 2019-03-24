@@ -59,9 +59,13 @@ def query_target_strokes_by_postion_size(position, stroke_obj_list):
 
     THRESHOLD_POSITION = 10
     THRESHOLD_SIZE = 15
+    THRESHOLD_CONDITION = 1.88
 
-    for stroke_obj in stroke_obj_list:
+    sorted_condition = {}
+    for i in range(len(stroke_obj_list)):
+        stroke_obj = stroke_obj_list[i]
         img_ = stroke_obj.image_bytes
+
         if img_ is None:
             print("stroke obj is None")
             continue
@@ -74,31 +78,39 @@ def query_target_strokes_by_postion_size(position, stroke_obj_list):
         w = rect_[2]
         h = rect_[3]
 
+        # calcuate the sorted condition
+        val = abs((w - w0) / w0 * 1.) + abs((h - h0) / h0 * 1.) + abs((w * h - w0 * h0) / (w0 * h0) * 1.)
+        sorted_condition[i] = val
+
         # Rule 1: almost same the position and size
         if abs(center_x - center_x0) <= THRESHOLD_POSITION and abs(center_y - center_y0) <= THRESHOLD_POSITION and \
                 abs(w - w0) <= THRESHOLD_SIZE and abs(h - h0) <= THRESHOLD_SIZE:
             strokes_same_post_and_size.append(stroke_obj.image_path)
             continue
 
-        # Rule 2: almost same the size
-        if abs(w - w0) <= THRESHOLD_SIZE and abs(h - h0) <= THRESHOLD_SIZE:
-            strokes_same_size.append(stroke_obj.image_path)
-            continue
-
-    # return target strokes
     if len(strokes_same_post_and_size) > 0:
         target_strokes_path += strokes_same_post_and_size
         return target_strokes_path
     else:
         print("Not find same postion and size strokes")
 
+    # Rule2: Almost same the position and size
+    if len(sorted_condition) == 0:
+        print("Sorted condition is null!")
+
+    sorted_condition_sorted = sorted(sorted_condition.items(), key=lambda x: x[1])
+    print(sorted_condition_sorted)
+    for s in sorted_condition_sorted:
+        if s[1] > THRESHOLD_CONDITION:
+            break
+        strokes_same_size.append(stroke_obj_list[s[0]].image_path)
+
+    # return target strokes
     if len(strokes_same_size) > 0:
         target_strokes_path += strokes_same_size
-        return target_strokes_path
+        # return target_strokes_path
     else:
         print("Not find same size strokes")
-
-    print('Not find target stroke')
     return target_strokes_path
 
 
@@ -238,7 +250,7 @@ def query_char_info_from_chars_list(chars):
                 print("Not find storke position of ", tag)
 
         if tag == "" and u_code == "":
-            print("Not find this char: ", ch)
+            # print("Not find this char: ", ch)
             continue
         if len(stroke_orders) != len(stroke_position):
             print(tag, "Stroke order and position are not same length!")
