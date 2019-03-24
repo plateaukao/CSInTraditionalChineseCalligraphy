@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
-    <height>728</height>
+    <width>1226</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -80,16 +80,6 @@
      </rect>
     </property>
    </widget>
-   <widget class="QListView" name="strokes_listView">
-    <property name="geometry">
-     <rect>
-      <x>680</x>
-      <y>381</y>
-      <width>181</width>
-      <height>281</height>
-     </rect>
-    </property>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
@@ -116,13 +106,46 @@
      <string>TextLabel</string>
     </property>
    </widget>
+   <widget class="QScrollArea" name="scrollArea">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>20</y>
+      <width>291</width>
+      <height>641</height>
+     </rect>
+    </property>
+    <property name="widgetResizable">
+     <bool>true</bool>
+    </property>
+    <widget class="QWidget" name="scrollAreaWidgetContents">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>289</width>
+       <height>639</height>
+      </rect>
+     </property>
+     <widget class="QTreeView" name="target_strokes_treeView">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>291</width>
+        <height>641</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>883</width>
+     <width>1226</width>
      <height>22</height>
     </rect>
    </property>

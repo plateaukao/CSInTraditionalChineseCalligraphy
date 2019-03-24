@@ -365,6 +365,7 @@ def query_char_target_stroke_by_dataset(dataset, char_info_list):
 def stroke_recompose(char_info_list, char_target_strokes_list):
     generated_result = []
     generated_strokes_result = []
+    generated_result_index_list = []
 
     for i in range(len(char_info_list)):
         ch_obj = char_info_list[i]
@@ -373,6 +374,7 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
 
         # strokes template
         strokes_temp_imgs = []
+        stroke_img_index = []
 
         # merge all stroke with center alignment
         if len(ch_stroke_imgs) == ch_obj.stroke_orders:
@@ -381,6 +383,7 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
         for j in range(len(ch_stroke_imgs)):
             if len(ch_stroke_imgs[j]) > 0:
                 img_path = ch_stroke_imgs[j][0]
+                stroke_img_index.append(0)
                 img_ = cv2.imread(img_path, 0)
                 img_ = cv2.resize(img_, (256, 256))
                 rect_ = getSingleMaxBoundingBoxOfImage(img_)
@@ -401,8 +404,55 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
                             img_[rect_[1] + y_][rect_[0] + x_]
         generated_result.append(bk)
         generated_strokes_result.append(strokes_temp_imgs)
+        generated_result_index_list.append(stroke_img_index)
 
-    return generated_result, generated_strokes_result
+    return generated_result, generated_strokes_result, generated_result_index_list
+
+
+def render_generated_image(char_info_list, char_target_strokes_list, generated_result_index_list, char_id=0):
+    """
+    Re-render generated result image with char id, stroke id, and stroke image id.
+    :param char_target_strokes_list:
+    :param generated_result_index_list: [][]
+    :param char_id:
+    :param stroke_id:
+    :param stroke_image_id:
+    :return:
+    """
+    if len(char_target_strokes_list) == 0:
+        print('Char target stroke list is None!')
+        return
+
+    ch_obj = char_info_list[char_id]
+
+    bk = createBlankGrayscaleImageWithSize((400, 400))
+
+    # get the target strokes info of char based on the char_id.
+    target_strokes_list = char_target_strokes_list[char_id]  # [stroke_id][stroke_names]
+    target_strokes_index_list = generated_result_index_list[char_id]  # [stroke_img_id]
+
+    for i in range(len(target_strokes_list)):
+        stroke_imgs_ = target_strokes_list[i]
+        stroke_img_path = stroke_imgs_[target_strokes_index_list[i]]
+
+        img_ = cv2.imread(stroke_img_path, 0)
+        img_ = cv2.resize(img_, (256, 256))
+        rect_ = getSingleMaxBoundingBoxOfImage(img_)
+
+        # resize stroke template image
+        s_temp_img = createBlankGrayscaleImageWithSize((400, 400))
+        s_temp_img[72: 72 + 256, 72: 72 + 256] = img_
+
+        cent_x0 = int(ch_obj.stroke_position[i][0] + ch_obj.stroke_position[i][2] / 2)
+        cent_y0 = int(ch_obj.stroke_position[i][1] + ch_obj.stroke_position[i][3] / 2)
+
+        # only copy the valid pixels
+        for x_ in range(rect_[2]):
+            for y_ in range(rect_[3]):
+                if img_[rect_[1] + y_][rect_[0] + x_] == 0:
+                    bk[cent_y0 - int(rect_[3] / 2) + 72 + y_][cent_x0 - int(rect_[2] / 2) + 72 + x_] = \
+                        img_[rect_[1] + y_][rect_[0] + x_]
+    return bk
 
 
 if __name__ == '__main__':

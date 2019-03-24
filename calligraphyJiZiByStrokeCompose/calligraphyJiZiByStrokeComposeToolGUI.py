@@ -12,7 +12,8 @@ from xml.dom import minidom
 
 from calligraphyJiZiByStrokeCompose.mainwindow import Ui_MainWindow
 from calligraphyJiZiByStrokeCompose.util import query_char_info, query_char_target_strokes, stroke_recompose, \
-                    load_stroke_library_dataset, query_char_info_from_chars_list, query_char_target_stroke_by_dataset
+                    load_stroke_library_dataset, query_char_info_from_chars_list, query_char_target_stroke_by_dataset, \
+                    render_generated_image
 
 
 class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
@@ -26,10 +27,17 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
     __recomposed_results = []
     __recomposed_stroke_results = []
+    __recomposed_results_index = []  # [char_id][stroke_image_ids]
+
+    __char_id = 0
+    __stroke_id = 0
+    __stroke_image_id = 0
 
     __target_char_strokes = []
 
     __stroke_dataset = None
+
+    __current_stroke_img_path = ""
 
     def __init__(self):
         super(CalligraphyJiZiByStrokeCompse, self).__init__()
@@ -39,10 +47,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.chars_tag_slm.setStringList(self.__chars_tag_list)
         self.chars_listView.setModel(self.chars_tag_slm)
         self.chars_listView.clicked.connect(self.handle_chars_tag_listview_item_clicked)
-
-        self.char_strokes_slm = QStringListModel()
-        self.strokes_listView.setModel(self.char_strokes_slm)
-        self.strokes_listView.clicked.connect(self.handle_char_stroke_listview_item_clicked)
 
         self.result_scene = QGraphicsScene()
         self.result_scene.setBackgroundBrush(Qt.gray)
@@ -64,13 +68,24 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         self.load_dataset_thread.signal.connect(self.handle_load_dataset_thread)
 
+        self.target_strokes_treeView.clicked.connect(self.handle_char_stroke_treeview_item_clicked)
+
     def handle_setting_btn(self):
+        """
+        Load stroke library dataset.
+        :return:
+        """
         print("Setting button clicked!")
         # start load dataset thread
         self.load_dataset_thread.start()
         self.statusbar.showMessage("Begin to load strokes dataset......")
 
     def handle_load_dataset_thread(self, dataset):
+        """
+        Thread for loading the dataset of stroke templates.
+        :param dataset:
+        :return:
+        """
         if dataset:
             self.__stroke_dataset = dataset
             self.statusbar.showMessage("Load strokes dataset Success!")
@@ -79,6 +94,10 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage("Load strokes dataset Failed!")
 
     def handle_generate_btn(self):
+        """
+        Generate new character.
+        :return:
+        """
         print("Generate button clicked!")
 
         # process input content
@@ -103,7 +122,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.__char_target_strokes_list = query_char_target_stroke_by_dataset(self.__stroke_dataset, self.__chars_info_list)
 
         # stroke recompose
-        self.__recomposed_results, self.__recomposed_stroke_results = stroke_recompose(self.__chars_info_list, self.__char_target_strokes_list)
+        self.__recomposed_results, self.__recomposed_stroke_results, self.__recomposed_results_index = \
+            stroke_recompose(self.__chars_info_list, self.__char_target_strokes_list)
 
         # update result gview
         if len(self.__recomposed_results) > 0:
@@ -120,12 +140,17 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             return
 
     def handle_chars_tag_listview_item_clicked(self, qModelIndex):
+        """
+        Chars list item clicked
+        :param qModelIndex:
+        :return:
+        """
         print(qModelIndex.row())
 
         index = qModelIndex.row()
+        self.__char_id = index
         select_char_info = self.__chars_info_list[index]
         select_char_strokes = self.__char_target_strokes_list[index]
-        print(select_char_strokes)
 
         self.__target_char_strokes = []
         for lt in select_char_strokes:
@@ -134,8 +159,11 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             else:
                 self.__target_char_strokes.append(lt[0])
 
-        self.char_strokes_slm.setStringList(self.__target_char_strokes)
         self.stroke_info_label.setText(select_char_info.stroke_orders_to_string)
+
+        # update target strokes tree view
+        self.handle_char_stroke_treeview_update(self.target_strokes_treeView, select_char_strokes)
+        self.target_strokes_treeView.expandAll()
 
         # update result gview
         if len(self.__recomposed_results) > 0:
@@ -151,25 +179,77 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             print("Not generate results")
             return
 
-    def handle_char_stroke_listview_item_clicked(self, qModelIndex):
-        print(qModelIndex.row())
-        index = qModelIndex.row()
+    def handle_char_stroke_treeview_update(self, controls, char_target_list, title='Target strokes'):
+        """
+        Update the tree view of target strokes.
+        :param controls:
+        :param char_target_list:
+        :param title:
+        :return:
+        """
+        model = QStandardItemModel(controls)
+        model.setColumnCount(1)
+        model.setRowCount(len(char_target_list))
+        model.setHeaderData(0, Qt.Horizontal, title)
 
-        if len(self.__target_char_strokes) > 0:
-            img_path = self.__target_char_strokes[index]
-            if img_path != "":
-                img_ = cv2.imread(img_path, 0)
-                qimage_ = QImage(img_.data, img_.shape[1], img_.shape[0], img_.shape[1], QImage.Format_Indexed8)
-                qimage_pix_ = QPixmap.fromImage(qimage_)
-                self.stroke_scene.addPixmap(qimage_pix_)
-                self.stroke_scene.setSceneRect(QRectF())
-                self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
-                self.stroke_scene.update()
-        else:
-            print("Not strokes existing!")
-            return
+        for stroke_id in range(len(char_target_list)):
+            imgs = char_target_list[stroke_id]
+
+            root_item = QStandardItem("Stroke {}".format(stroke_id+1))
+            for img_id in range(len(imgs)):
+                sub_item = QStandardItem(imgs[img_id])
+                root_item.appendRow(sub_item)
+
+            model.setItem(stroke_id, 0, root_item)
+
+        controls.setModel(model)
+
+    def handle_char_stroke_treeview_item_clicked(self, qModelIndex):
+        """
+        Tree view of target strokes item clicked.
+        :param qModelIndex:
+        :return:
+        """
+        print(qModelIndex.row())
+        print(self.target_strokes_treeView.currentIndex().data())
+        print(self.target_strokes_treeView.currentIndex().parent().row())
+
+        self.__current_stroke_img_path = self.target_strokes_treeView.currentIndex().data()
+
+        if self.__current_stroke_img_path != "":
+            img_ = cv2.imread(self.__current_stroke_img_path, 0)
+            qimg_ = QImage(img_.data, img_.shape[1], img_.shape[0], img_.shape[1], QImage.Format_Indexed8)
+            qimage_pix_ = QPixmap.fromImage(qimg_)
+            self.stroke_scene.addPixmap(qimage_pix_)
+            self.stroke_scene.setSceneRect(QRectF())
+            self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
+            self.stroke_scene.update()
+
+        # get target id
+        self.__stroke_id = self.target_strokes_treeView.currentIndex().parent().row()
+        self.__stroke_image_id = self.target_strokes_treeView.currentIndex().row()
+
+        print(self.__char_id, self.__stroke_id, self.__stroke_image_id)
+        print(self.__recomposed_results_index)
+
+        self.__recomposed_results_index[self.__char_id][self.__stroke_id] = self.__stroke_image_id
+
+        #update the generated result image
+        img_ = render_generated_image(self.__chars_info_list, self.__char_target_strokes_list,\
+                                      self.__recomposed_results_index, self.__char_id)
+        qimg_ = QImage(img_.data, img_.shape[1], img_.shape[0], img_.shape[1], QImage.Format_Indexed8)
+
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.result_scene.addPixmap(qimg_pix_)
+        self.result_scene.setSceneRect(QRectF())
+        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.result_scene.update()
 
     def handle_SVG_extraction_btn(self):
+        """
+        Extract SVG file.
+        :return:
+        """
         print("SVG extraction button clicked!")
         if self.__recomposed_stroke_results is None or len(self.__recomposed_stroke_results) == 0:
             self.statusbar.showMessage("Stroke templates is None")
