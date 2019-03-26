@@ -35,6 +35,9 @@ class Ui_MainWindow(object):
         self.extract_btn = QtWidgets.QPushButton(self.centralwidget)
         self.extract_btn.setGeometry(QtCore.QRect(710, 700, 114, 32))
         self.extract_btn.setObjectName("extract_btn")
+        self.clear_btn = QtWidgets.QPushButton(self.centralwidget)
+        self.clear_btn.setGeometry(QtCore.QRect(290, 700, 114, 32))
+        self.clear_btn.setObjectName("clear_btn")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 1391, 22))
@@ -53,4 +56,5 @@ class Ui_MainWindow(object):
         self.open_btn.setText(_translate("MainWindow", "Open"))
         self.save_btn.setText(_translate("MainWindow", "Save"))
         self.extract_btn.setText(_translate("MainWindow", "Extract"))
+        self.clear_btn.setText(_translate("MainWindow", "Clear"))
 

@@ -44,6 +44,7 @@ class CharRadicalsSplitByStructure(QMainWindow, Ui_MainWindow):
         self.open_btn.clicked.connect(self.handle_open_button_clicked)
         self.extract_btn.clicked.connect(self.handle_extract_btn_clicked)
         self.save_btn.clicked.connect(self.handle_save_btn_clicked)
+        self.clear_btn.clicked.connect(self.handle_clear_btn_clicked)
 
     def handle_open_button_clicked(self):
         self.__image_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
@@ -110,6 +111,18 @@ class CharRadicalsSplitByStructure(QMainWindow, Ui_MainWindow):
         cv2.imwrite(img_path, self.__extracted_image)
 
         self.statusbar.showMessage("Save successed!")
+
+    def handle_clear_btn_clicked(self):
+        self.char_scene.lastPoint = None
+        self.char_scene.endPoint = None
+        self.char_scene.points = []
+
+        qimg_ = QImage(self.__char_image.data, self.__char_image.shape[1], self.__char_image.shape[0],
+                       self.__char_image.shape[1], QImage.Format_Indexed8)
+
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.char_scene.addPixmap(qimg_pix_)
+        self.char_scene.update()
 
 
 class GraphicsScene(QGraphicsScene):
