@@ -50,6 +50,7 @@ class CharRadicalsSplitByStructure(QMainWindow, Ui_MainWindow):
         self.__image_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
 
         file_names = [f for f in os.listdir(self.__image_path) if "." not in f]
+        file_names = sorted(file_names)
 
         for fn in file_names:
             names_ = [f for f in os.listdir(os.path.join(self.__image_path, fn)) if ".png" in f]
