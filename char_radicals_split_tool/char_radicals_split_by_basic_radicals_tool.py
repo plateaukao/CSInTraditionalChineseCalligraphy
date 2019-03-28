@@ -109,6 +109,11 @@ class CharRadicalsSplitByBasicRadicals(QMainWindow, Ui_MainWindow):
         img_name = self.name_lineEdit.text()
         img_path = os.path.join(self.__image_path, img_name.split("_")[0], self.__label, img_name)
 
+        dict_path = img_path.replace('.png', '')
+
+        if not os.path.exists(dict_path):
+            os.mkdir(dict_path)
+
         cv2.imwrite(img_path, self.__extracted_image)
 
         self.statusbar.showMessage("Save successed!")
