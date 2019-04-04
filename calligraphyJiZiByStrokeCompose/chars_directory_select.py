@@ -7,9 +7,6 @@ char_1000_path = "../../../Data/Calligraphy_database/Chars_1000"
 char_path = "../../../Data/Calligraphy_database/Chars"
 
 def chars_select():
-    char_775_path = "../../../Data/Calligraphy_database/Chars_775"
-    char_1000_path = "../../../Data/Calligraphy_database/Chars_1000"
-    char_path = "../../../Data/Calligraphy_database/Chars"
 
     file_names = [f for f in os.listdir(char_path) if '.' not in f]
     print(file_names)
@@ -49,6 +46,7 @@ def clean_data():
     filenames = [f for f in os.listdir(char_775_path) if '.' not in f]
 
     for fn in filenames:
+        print(fn)
         radical_path = os.path.join(char_775_path, fn, "basic radicals")
         stroke_path = os.path.join(char_775_path, fn, "strokes")
 
@@ -60,10 +58,14 @@ def clean_data():
         # stroke path rename png file
         png_names = [f for f in os.listdir(stroke_path) if ".png" in f]
         for pn in png_names:
+            if 'stroke' in pn:
+                continue
             pns = pn.split('_')
+            print(pns)
             new_pn = pns[0] + '_' + pns[1] + '_' + 'stroke' + '_' + pns[2]
 
             shutil.move(os.path.join(stroke_path, pn), os.path.join(stroke_path, new_pn))
+        # break
 
     filenames = [f for f in os.listdir(char_1000_path) if '.' not in f]
 
@@ -79,10 +81,51 @@ def clean_data():
         # stroke path rename png file
         png_names = [f for f in os.listdir(stroke_path) if ".png" in f]
         for pn in png_names:
+            if 'stroke' in pn:
+                continue
             pns = pn.split('_')
             new_pn = pns[0] + '_' + pns[1] + '_' + 'stroke' + '_' + pns[2]
 
             shutil.move(os.path.join(stroke_path, pn), os.path.join(stroke_path, new_pn))
+
+
+def clean_error_data():
+    pass
+
+    # delete error files
+    # filenames = [f for f in os.listdir(os.path.join(char_1000_path)) if '.' not in f]
+    # for fn in filenames:
+    #     stroke_names = [f for f in os.listdir(os.path.join(char_1000_path, fn, 'strokes'))]
+    #     for sn in stroke_names:
+    #         os.remove(os.path.join(char_1000_path, fn, 'strokes', sn))
+    #
+    # return
+
+
+    # 775 chars
+    # filenames = [f for f in os.listdir(char_775_path) if '.' not in f]
+    #
+    # for fn in filenames:
+    #     if not os.path.exists(os.path.join(char_path, fn)):
+    #         print(fn, " not found!")
+    #         continue
+    #
+    #     stroke_names = [f for f in os.listdir(os.path.join(char_path, fn, 'strokes')) if '.png' in f]
+    #     for sn in stroke_names:
+    #         shutil.copy2(os.path.join(char_path, fn, 'strokes', sn), os.path.join(char_775_path, fn, 'strokes'))
+
+    # 1000 chars
+    # filenames = [f for f in os.listdir(char_1000_path) if '.' not in f]
+    #
+    # for fn in filenames:
+    #     if not os.path.exists(os.path.join(char_path, fn)):
+    #         print(fn, " not found!")
+    #         continue
+    #
+    #     stroke_names = [f for f in os.listdir(os.path.join(char_path, fn, 'strokes')) if '.png' in f]
+    #     for sn in stroke_names:
+    #         shutil.copy2(os.path.join(char_path, fn, 'strokes', sn), os.path.join(char_1000_path, fn, 'strokes'))
+
 
 
 
@@ -90,3 +133,4 @@ def clean_data():
 if __name__ == '__main__':
     # chars_select()
     clean_data()
+    # clean_error_data()
