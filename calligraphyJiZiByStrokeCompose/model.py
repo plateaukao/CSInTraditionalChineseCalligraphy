@@ -54,9 +54,14 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                     for bsl in basic_radicals_lib:
                         x, y, w, h = getSingleMaxBoundingBoxOfImage(bsl.image_bytes)
 
+                        sim_bs_dict = {}
+
                         # rule1
                         if abs(x - bs_obj_post[0]) <= 5 and abs(y - bs_obj_post[1]) <= 5 and abs(w - bs_obj_post[2]) <= 5 and abs(h - bs_obj_post[3]) <= 5:
-                            similar_bss.append(bsl.image_path)
+                            sim_bs_dict["path"] = bsl.image_path
+                            sim_bs_dict["strokes_id"] = bs_obj.strokes_id
+
+                            similar_bss.append(sim_bs_dict)
 
                 similar_basic_radicals[bs_obj_id] = similar_bss
 
