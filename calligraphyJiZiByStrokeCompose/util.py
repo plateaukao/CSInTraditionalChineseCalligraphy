@@ -1,7 +1,8 @@
 # coding: utf-8
 import os
 from calligraphyJiZiByStrokeCompose.chinesecharacter import ChineseCharacter
-from calligraphyJiZiByStrokeCompose.stroke_image import StrokeImage
+from calligraphyJiZiByStrokeCompose.stroke_image import StrokeImage, BasicRadicalImage
+from calligraphyJiZiByStrokeCompose.basicradical import BasicRadical, Stroke
 import xml.etree.ElementTree as ET
 import ast
 import cv2
@@ -10,7 +11,15 @@ import timeit
 from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscaleImageWithSize
 
 
-def load_stroke_library_dataset(path="../../../Data/Stroke_recomposed_tool/strokes dataset"):
+
+
+
+
+
+
+
+
+def load_stroke_library_dataset(path="../../../Data/Calligraphy_database/char_generate_lib/strokes dataset"):
     if path == "":
         print('Stroke library path should not be None!')
         return
@@ -38,6 +47,141 @@ def load_stroke_library_dataset(path="../../../Data/Stroke_recomposed_tool/strok
 
     print('load image num: ', count)
     return dataset
+
+
+def load_basic_radicals_library_dataset(path="../../../Data/Calligraphy_database/char_generate_lib/basic radicals dataset"):
+    if path == "" or not os.path.exists(path):
+        print("Basic radicals library path is None!")
+        return
+    type_names = [f for f in os.listdir(path) if "." not in f]
+    print("Type name num: ", len(type_names))
+
+    dataset = {}
+    count = 0
+    for tn in type_names:
+        tn_path = os.path.join(path, tn)
+
+        img_obj_list = []
+        img_names = [os.path.join(tn_path, f) for f in os.listdir(tn_path) if ".png" in f]
+
+        for img_name in img_names:
+            img_ = cv2.imread(img_name, 0)
+            basic_radical_obj = BasicRadicalImage(img_name, img_)
+            img_obj_list.append(basic_radical_obj)
+            count += 1
+        dataset[tn] = img_obj_list
+    print("load image num: ", count)
+    return dataset
+
+
+def query_char_info_from_chars_list(chars, xml_path):
+    """
+    Query the char info list.
+    :param chars:
+    :param xml_path:
+    :return:
+    """
+    if chars is None or len(chars) == 0:
+        return []
+
+    # load radical data
+    tree = ET.parse(xml_path)
+    if tree is None:
+        print("tree is none!")
+        return
+
+    root = tree.getroot()
+    print("root len:", len(root))
+
+    char_info_list = []
+
+    for ch in chars:
+        ch_obj = query_char_info_from_char(ch, root)
+        char_info_list.append(ch_obj)
+
+    return char_info_list
+
+
+def query_char_info_from_char(char, root):
+    if char == '':
+        return []
+    if root is None or len(root) <= 0:
+        print('Root is None!')
+        return []
+
+    char_info_obj = None
+
+    tag = ""
+    u_code = ""
+    stroke_orders = []
+    stroke_position = []
+    basic_radicals = []
+    strokes = []
+
+    for child in root:
+
+        ch = child.attrib["TAG"].strip()
+        if len(ch) > 1 or ch != char:
+            continue
+
+        # tag
+        tag = ch
+
+        # unicode
+        u_code = child.attrib["ID"]
+
+        # stroke order
+        stroke_order_elems = child.findall('STROKE_ORDER')
+        if stroke_order_elems:
+            s_order = stroke_order_elems[0].text
+            stroke_orders = s_order.split("|")
+        else:
+            print("not find stroke order of ", tag)
+
+        # stroke position
+        s_post_elems = child.findall('STROKES_POSITION')
+        if s_post_elems:
+            ss_post_elems = s_post_elems[0].findall('STROKE_POSITION')
+            if ss_post_elems:
+                for elem in ss_post_elems:
+                    stroke_position.append(ast.literal_eval(elem.text))
+        else:
+            print("Not find storke position of ", tag)
+
+        # basic radicals
+        basic_radicals_elems = child.findall("BASIC_RADICALS")
+        if basic_radicals_elems:
+            bs_elems = basic_radicals_elems[0].findall("BASIC_RADICAL")
+            if bs_elems:
+                for bs in bs_elems:
+                    bs_id = bs.attrib["ID"]
+                    bs_tag = bs.attrib["TAG"]
+                    bs_post = bs.attrib["POSITION"]
+
+                    # basic radical object list
+                    bs_strokes = []
+
+                    bs_strokes_elems = bs.findall("STROKES")
+                    if bs_strokes_elems:
+                        bs_stk_elems = bs_strokes_elems[0].findall("STROKE")
+                        if bs_stk_elems:
+                            for bs_stk in bs_stk_elems:
+                                bs_stroke_tag = bs_stk.attrib["TAG"]
+                                bs_stroke_post = bs_stk.text
+
+                                bs_stroke_obj = Stroke(id=bs_stroke_tag, tag=bs_stroke_tag, position=bs_stroke_post)
+
+                                bs_strokes.append(bs_stroke_obj)
+
+                    bs_obj = BasicRadical(id=bs_id, tag=bs_tag, position=bs_post, strokes=bs_strokes)
+
+                    basic_radicals.append(bs_obj)
+
+        # strokes
+        break
+
+    char_info_obj = ChineseCharacter(tag=tag, u_code=u_code, stroke_orders=stroke_orders, stroke_position=stroke_position, basic_radicals=basic_radicals, strokes=strokes)
+    return char_info_obj
 
 
 def query_target_strokes_by_postion_size(position, stroke_obj_list):
@@ -199,67 +343,64 @@ def query_taget_strokes(type, position, library_path="../../../Data/Stroke_recom
     return target_strokes_path
 
 
-def query_char_info_from_chars_list(chars):
-    if chars is None or len(chars) == 0:
-        return []
-
-    # reterival xml to find character info
-    xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
-
-    # load radical data
-    tree = ET.parse(xml_path)
-    if tree is None:
-        print("tree is none!")
-        return
-
-    root = tree.getroot()
-    print("root len:", len(root))
-
-    char_info_list = []
-    for child in root:
-
-        tag = ""
-        u_code = ""
-        stroke_orders = []
-        stroke_position = []
-
-        ch = child.attrib["TAG"].strip()
-        if len(ch) > 1:
-            continue
-
-        if ch in chars:
-            tag = ch
-            u_code = child.attrib["ID"]
-
-            # stroke order
-            stroke_order_elems = child.findall('STROKE_ORDER')
-            if stroke_order_elems:
-                s_order = stroke_order_elems[0].text
-                stroke_orders = s_order.split("|")
-            else:
-                print("not find stroke order of ", tag)
-
-            # stroke position
-            s_post_elems = child.findall('STROKES_POSITION')
-            if s_post_elems:
-                ss_post_elems = s_post_elems[0].findall('STROKE_POSITION')
-                if ss_post_elems:
-                    for elem in ss_post_elems:
-                        stroke_position.append(ast.literal_eval(elem.text))
-            else:
-                print("Not find storke position of ", tag)
-
-        if tag == "" and u_code == "":
-            # print("Not find this char: ", ch)
-            continue
-        if len(stroke_orders) != len(stroke_position):
-            print(tag, "Stroke order and position are not same length!")
-            continue
-
-        # create ChineseCharacter object
-        cc_obj = ChineseCharacter(tag, u_code, stroke_orders, stroke_position)
-        char_info_list.append(cc_obj)
-    return char_info_list
+# def query_char_info_from_chars_list(chars, xml_path):
+#     if chars is None or len(chars) == 0:
+#         return []
+#
+#     # load radical data
+#     tree = ET.parse(xml_path)
+#     if tree is None:
+#         print("tree is none!")
+#         return
+#
+#     root = tree.getroot()
+#     print("root len:", len(root))
+#
+#     char_info_list = []
+#     for child in root:
+#
+#         tag = ""
+#         u_code = ""
+#         stroke_orders = []
+#         stroke_position = []
+#
+#         ch = child.attrib["TAG"].strip()
+#         if len(ch) > 1:
+#             continue
+#
+#         if ch in chars:
+#             tag = ch
+#             u_code = child.attrib["ID"]
+#
+#             # stroke order
+#             stroke_order_elems = child.findall('STROKE_ORDER')
+#             if stroke_order_elems:
+#                 s_order = stroke_order_elems[0].text
+#                 stroke_orders = s_order.split("|")
+#             else:
+#                 print("not find stroke order of ", tag)
+#
+#             # stroke position
+#             s_post_elems = child.findall('STROKES_POSITION')
+#             if s_post_elems:
+#                 ss_post_elems = s_post_elems[0].findall('STROKE_POSITION')
+#                 if ss_post_elems:
+#                     for elem in ss_post_elems:
+#                         stroke_position.append(ast.literal_eval(elem.text))
+#             else:
+#                 print("Not find storke position of ", tag)
+#
+#         if tag == "" and u_code == "":
+#             # print("Not find this char: ", ch)
+#             continue
+#         if len(stroke_orders) != len(stroke_position):
+#             print(tag, "Stroke order and position are not same length!")
+#             continue
+#
+#         # create ChineseCharacter object
+#         cc_obj = ChineseCharacter(tag, u_code, stroke_orders, stroke_position)
+#         char_info_list.append(cc_obj)
+#     return char_info_list
 
 
 def query_char_info(input):
@@ -362,6 +503,21 @@ def query_char_target_stroke_by_dataset(dataset, char_info_list):
     return char_target_strokes_list
 
 
+def query_char_target_basic_radical_and_stroke_by_dataset(basic_radical_dataset, stroke_dataset, char_info_list):
+    if basic_radical_dataset is None or stroke_dataset is None or char_info_list is None:
+        print("Basic radical dataset, stroke dataset or char info list should be not None!")
+        return
+
+    # iterate the char info objects
+    for i in range(len(char_info_list)):
+        ch_obj = char_info_list[i]
+
+
+
+
+
+
+
 def stroke_recompose(char_info_list, char_target_strokes_list):
     generated_result = []
     generated_strokes_result = []
@@ -391,7 +547,6 @@ def stroke_recompose(char_info_list, char_target_strokes_list):
                 # resize stroke template image
                 s_temp_img = createBlankGrayscaleImageWithSize((400, 400))
                 # s_temp_img[72: 72+256, 72: 72+256] = img_
-
 
                 cent_x0 = int(ch_obj.stroke_position[j][0] + ch_obj.stroke_position[j][2] / 2)
                 cent_y0 = int(ch_obj.stroke_position[j][1] + ch_obj.stroke_position[j][3] / 2)
