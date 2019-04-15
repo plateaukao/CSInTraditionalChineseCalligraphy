@@ -11,14 +11,6 @@ import timeit
 from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscaleImageWithSize
 
 
-
-
-
-
-
-
-
-
 def load_stroke_library_dataset(path="../../../Data/Calligraphy_database/char_generate_lib/strokes dataset"):
     if path == "":
         print('Stroke library path should not be None!')
@@ -341,66 +333,6 @@ def query_taget_strokes(type, position, library_path="../../../Data/Stroke_recom
 
     print('Not find target stroke')
     return target_strokes_path
-
-
-# def query_char_info_from_chars_list(chars, xml_path):
-#     if chars is None or len(chars) == 0:
-#         return []
-#
-#     # load radical data
-#     tree = ET.parse(xml_path)
-#     if tree is None:
-#         print("tree is none!")
-#         return
-#
-#     root = tree.getroot()
-#     print("root len:", len(root))
-#
-#     char_info_list = []
-#     for child in root:
-#
-#         tag = ""
-#         u_code = ""
-#         stroke_orders = []
-#         stroke_position = []
-#
-#         ch = child.attrib["TAG"].strip()
-#         if len(ch) > 1:
-#             continue
-#
-#         if ch in chars:
-#             tag = ch
-#             u_code = child.attrib["ID"]
-#
-#             # stroke order
-#             stroke_order_elems = child.findall('STROKE_ORDER')
-#             if stroke_order_elems:
-#                 s_order = stroke_order_elems[0].text
-#                 stroke_orders = s_order.split("|")
-#             else:
-#                 print("not find stroke order of ", tag)
-#
-#             # stroke position
-#             s_post_elems = child.findall('STROKES_POSITION')
-#             if s_post_elems:
-#                 ss_post_elems = s_post_elems[0].findall('STROKE_POSITION')
-#                 if ss_post_elems:
-#                     for elem in ss_post_elems:
-#                         stroke_position.append(ast.literal_eval(elem.text))
-#             else:
-#                 print("Not find storke position of ", tag)
-#
-#         if tag == "" and u_code == "":
-#             # print("Not find this char: ", ch)
-#             continue
-#         if len(stroke_orders) != len(stroke_position):
-#             print(tag, "Stroke order and position are not same length!")
-#             continue
-#
-#         # create ChineseCharacter object
-#         cc_obj = ChineseCharacter(tag, u_code, stroke_orders, stroke_position)
-#         char_info_list.append(cc_obj)
-#     return char_info_list
 
 
 def query_char_info(input):
