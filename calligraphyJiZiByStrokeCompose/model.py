@@ -54,6 +54,12 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                     print("Basic radicals lib len: ", len(basic_radicals_lib))
 
                     for bsl in basic_radicals_lib:
+
+                        # get bsl obj path
+                        path_ = bsl.image_path
+                        bsl_tag = path_.split("/")[-1].replace(".png", "").split("_")[0]
+                        bsl_id = path_.split("/")[-1].replace(".png", "").split("_")[2]
+
                         x, y, w, h = getSingleMaxBoundingBoxOfImage(bsl.image_bytes)
 
                         sim_bs_dict = {}
@@ -61,7 +67,20 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                         # rule1
                         if abs(x - bs_obj_post[0]) <= 5 and abs(y - bs_obj_post[1]) <= 5 and abs(w - bs_obj_post[2]) <= 5 and abs(h - bs_obj_post[3]) <= 5:
                             sim_bs_dict["path"] = bsl.image_path
-                            sim_bs_dict["strokes_id"] = bs_obj.strokes_id
+
+                            # target bs obj strokes id
+                            print("bsl tag: ", bsl_tag)
+                            targ_bs_obj_list = query_char_info_from_chars_list([bsl_tag])
+                            if len(targ_bs_obj_list) == 0:
+                                print("template bs objs not found!")
+                            else:
+                                targ_bs_obj = targ_bs_obj_list[0]
+                                print(targ_bs_obj.tag, " ", int(bsl_id))
+                                print(targ_bs_obj.basic_radicals[0].strokes_id)
+                                print(targ_bs_obj.basic_radicals[1].strokes_id)
+                                sim_bs_dict["strokes_id"] = targ_bs_obj.basic_radicals[int(bsl_id)].strokes_id
+                                print("sim strokes id: ", sim_bs_dict["strokes_id"])
+
                             sim_bs_dict["position"] = (x, y, w, h)
 
                             similar_bss.append(sim_bs_dict)
@@ -133,6 +152,9 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
                 strokes_id_ = bs_["strokes_id"]
                 postion_ = bs_["position"]
 
+                print("path: ", path_)
+                print("strokes id: ", strokes_id_)
+
                 char_tag = path_.split('/')[-1].replace(".png", "").split("_")[0]
 
                 char_path_ = os.path.join(char_root_path, char_tag, "strokes")
@@ -157,8 +179,8 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
         print(similar_bs_dict)
 
         # recompose basic radicals and strokes
-
         bk = createBlankGrayscaleImageWithSize((256, 256))
+
         # load basic radicals stroke images and center alignment
         for bs_id in similar_bs_dict.keys():
             for bs_obj in similar_bs_dict[bs_id]:
@@ -197,40 +219,44 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
                 break
 
         # load stroke images
-        for s_id in similar_strokes.keys():
+        # for s_id in similar_strokes.keys():
+        #
+        #     # get template stroke position
+        #     print(s_id)
+        #
+        #     temp_post = None
+        #     for stk_obj in ch_strokes_list:
+        #         if s_id == stk_obj.id:
+        #             temp_post = stk_obj.position
+        #             break
+        #
+        #     if temp_post == None:
+        #         print("Not find temp position!")
+        #         continue
+        #
+        #     cent_x0 = int(temp_post[0] + temp_post[2] / 2)
+        #     cent_y0 = int(temp_post[1] + temp_post[3] / 2)
+        #
+        #     path_ = similar_strokes[s_id][0]
+        #
+        #     img_ = cv2.imread(path_, 0)
+        #
+        #     x, y, w, h = getSingleMaxBoundingBoxOfImage(img_)
+        #
+        #     cent_x = int(x + w / 2)
+        #     cent_y = int(y + h / 2)
+        #
+        #     offset_x = cent_x - cent_x0
+        #     offset_y = cent_y - cent_y0
+        #
+        #     print(offset_x, offset_y)
+        #
+        #
+        #     for x in range(img_.shape[0]):
+        #         for y in range(img_.shape[1]):
+        #             if img_[x][y] == 0 and x+offset_x <= 255 and y+offset_y<= 255:
+        #                 bk[x+offset_x][y+offset_y] = 0
 
-            # get template stroke position
-            print(s_id)
-
-            temp_post = None
-            for stk_obj in ch_strokes_list:
-                if s_id == stk_obj.id:
-                    temp_post = stk_obj.position
-                    break
-
-            if temp_post == None:
-                print("Not find temp position!")
-                continue
-
-            cent_x0 = int(temp_post[0] + temp_post[2] / 2)
-            cent_y0 = int(temp_post[1] + temp_post[3] / 2)
-
-            path_ = similar_strokes[s_id][0]
-
-            img_ = cv2.imread(path_, 0)
-
-            x, y, w, h = getSingleMaxBoundingBoxOfImage(img_)
-
-            cent_x = int(x + w / 2)
-            cent_y = int(y + h / 2)
-
-            offset_x = cent_x - cent_x0
-            offset_y = cent_y - cent_y0
-
-            for x in range(img_.shape[0]):
-                for y in range(img_.shape[1]):
-                    if img_[x][y] == 0:
-                        bk[x + offset_x][y + offset_y] = 0
 
         generated_images.append(bk)
     return generated_images
@@ -305,7 +331,7 @@ def find_similar_strokes(type, position, strokes_dataset):
     return similar_strokes
 
 
-def query_char_info_from_chars_list(chars, xml_path):
+def query_char_info_from_chars_list(chars, xml_path="../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"):
     """
     Query the char info list.
     :param chars:
@@ -401,8 +427,6 @@ def query_char_info_from_char(char, root):
                     bs_post = bs.attrib["POSITION"]
 
                     # basic radical object list
-                    bs_strokes = []
-
                     bs_strokes_id = []
 
                     bs_strokes_elems = bs.findall("STROKES")
@@ -414,6 +438,7 @@ def query_char_info_from_char(char, root):
                                 bs_strokes_id.append(bs_stroke_id)
 
                     bs_obj = BasicRadcial(id=bs_id, tag=bs_tag, path="", position=bs_post, strokes_id=bs_strokes_id)
+                    print("bs_id: ", bs_id, " ", bs_strokes_id)
 
                     basic_radicals.append(bs_obj)
 
