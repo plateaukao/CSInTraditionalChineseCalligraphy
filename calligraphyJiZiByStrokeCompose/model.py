@@ -241,7 +241,9 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
             cent_x0 = int(real_post[0] + real_post[2] / 2)
             cent_y0 = int(real_post[1] + real_post[3] / 2)
 
-            path_ = similar_strokes[s_id][0]
+            # path_ = similar_strokes[s_id][0]   # use the most match stroke
+            path_ = find_most_match_stroke(real_post, similar_strokes[s_id])
+
             img_ = cv2.imread(path_, 0)
             rect_ = getSingleMaxBoundingBoxOfImage(img_)
 
@@ -254,6 +256,44 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
 
         generated_images.append(bk)
     return generated_images
+
+
+def find_most_match_stroke(position, paths, alpha=0.8):
+    """
+    Find the most match stroke
+    :param position:
+    :param paths:
+    :return:
+    """
+    x0, y0, w0, h0 = position
+
+    # similar distance:  ssim = alpha * size_distance + (1-alpha) * location_distance
+    ssim_distance_dict = {}
+
+    for i in range(len(paths)):
+        p_ = paths[i]
+        if p_ == "":
+            continue
+
+        img_ = cv2.imread(p_, 0)
+        x, y, w, h = getSingleMaxBoundingBoxOfImage(img_)
+
+        # calculate the size similar distance
+        size_dist = abs(w - w0) + abs(h - h0)
+
+        # calcluate the location similar distance
+        location_dist = abs(x - x0) + abs(y - y0)
+
+        similar_dist = alpha * size_dist + (1 - alpha) * location_dist
+        ssim_distance_dict[i] = similar_dist
+
+    # sort the size and location similar distance
+    ssim_distance_dict_sorted = [(k, ssim_distance_dict[k]) for k in sorted(ssim_distance_dict, key=ssim_distance_dict.get)]
+
+    most_similar_stroke_id = ssim_distance_dict_sorted[0][0]
+    print("most ssim distance: ", ssim_distance_dict_sorted[0][1])
+
+    return paths[most_similar_stroke_id]
 
 
 def find_similar_strokes(type, position, strokes_dataset):
