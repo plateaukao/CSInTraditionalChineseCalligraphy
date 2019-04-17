@@ -46,33 +46,34 @@ if __name__ == '__main__':
     # for sk in char_info_list[0].strokes:
     #     print(sk.id, sk.tag, sk.position)
 
-    chars = "咨"
-    results, similar_chars = char_generations(chars)
+    # chars = "吉"
+    # chars = "佃"
+    # results, similar_chars = char_generations(chars)
+    #
+    # for i in range(len(results)):
+    #     cv2.imshow("img_%d" % i, results[i] )
+    #
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
-    for i in range(len(results)):
-        cv2.imshow("img_%d" % i, results[i] )
+    path = "../../../Data/Calligraphy_database/Chars_1000"
 
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    save_path = "../../../Data/generated_results/777 chars"
 
-    # path = "../../../Data/Calligraphy_database/Chars_1000"
+    chars = [f for f in os.listdir(path) if "." not in f]
+    print(len(chars))
+    print(chars)
     #
-    # save_path = "../../../Data/generated_results/777 chars"
-    #
-    # chars = [f for f in os.listdir(path) if "." not in f]
-    # print(len(chars))
-    # print(chars)
-    #
-    # for i in range(len(chars)):
-    #     ch = chars[i]
-    #     print(ch)
-    #
-    #     generated_images, _ = char_generations(ch)
-    #
-    #     img_ = generated_images[0]
-    #
-    #     cv2.imwrite(os.path.join(save_path, "%s_%d.png" % (ch, i)), img_)
+    for i in range(len(chars)):
+        ch = chars[i]
+        print(ch)
 
+        generated_images, _ = char_generations(ch)
+
+        img_ = generated_images[0]
+
+        cv2.imwrite(os.path.join(save_path, "%s_%d.png" % (ch, i)), img_)
+    #
     # targ_bs_obj_list = query_char_info_from_chars_list(["告"])
     # print(targ_bs_obj_list[0].basic_radicals[0].strokes_id)
 

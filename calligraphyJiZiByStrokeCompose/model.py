@@ -75,10 +75,11 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                                 print("template bs objs not found!")
                             else:
                                 targ_bs_obj = targ_bs_obj_list[0]
-                                print(targ_bs_obj.tag, " ", int(bsl_id))
-                                print(targ_bs_obj.basic_radicals[0].strokes_id)
-                                print(targ_bs_obj.basic_radicals[1].strokes_id)
-                                sim_bs_dict["strokes_id"] = targ_bs_obj.basic_radicals[int(bsl_id)].strokes_id
+
+                                for bs_ in targ_bs_obj.basic_radicals:
+                                    if bs_.id == bsl_id:
+                                        sim_bs_dict["strokes_id"] = bs_.strokes_id
+
                                 print("sim strokes id: ", sim_bs_dict["strokes_id"])
 
                             sim_bs_dict["position"] = (x, y, w, h)
@@ -118,9 +119,9 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
     return similar_chars
 
 
-def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775"):
+def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775", size=400):
     """
-    Recompose chars
+    Recompose chars to 400 x 400 image from 256 x 256 to avoid out of size of image (256, 256)
     :param chars_info_list:
     :param similar_chars:
     :param char_root_path:
@@ -138,12 +139,13 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
         ch_obj = chars_info_list[ch_id]
         ch_strokes_list = ch_obj.strokes
 
+        print("process: ", ch_obj.tag)
+
         # get basic radicals info and his strokes images
         similar_bs_dict = {}
         for bs_id in similar_basic_radicals.keys():
 
             bs_obj = []
-
             for bs_ in similar_basic_radicals[bs_id]:
 
                 bs_obj_dict = {}
@@ -156,9 +158,7 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
                 print("strokes id: ", strokes_id_)
 
                 char_tag = path_.split('/')[-1].replace(".png", "").split("_")[0]
-
                 char_path_ = os.path.join(char_root_path, char_tag, "strokes")
-
                 stroke_img_names = [f for f in os.listdir(char_path_) if ".png" in f]
 
                 stroke_img_dict = {}
@@ -179,14 +179,14 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
         print(similar_bs_dict)
 
         # recompose basic radicals and strokes
-        bk = createBlankGrayscaleImageWithSize((256, 256))
+        bk = createBlankGrayscaleImageWithSize((size, size))
+        offset_base = int(abs(size - 256) / 2)
 
         # load basic radicals stroke images and center alignment
         for bs_id in similar_bs_dict.keys():
             for bs_obj in similar_bs_dict[bs_id]:
-                print(bs_obj)
 
-                bk_bs = createBlankGrayscaleImageWithSize((256, 256))
+                bk_bs = createBlankGrayscaleImageWithSize((size, size))  # merge strokes of this basic radical together to get single connected component
 
                 stroke_objs = bs_obj["strokes"]
                 post_ = bs_obj["position"]
@@ -202,60 +202,54 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
                     for x in range(img_.shape[0]):
                         for y in range(img_.shape[1]):
                             if img_[x][y] == 0:
-                                bk_bs[x][y] = 0
+                                bk_bs[x+offset_base][y+offset_base] = 0
 
                 x, y, w, h = getSingleMaxBoundingBoxOfImage(bk_bs)
 
                 cent_x = int(x + w / 2)
                 cent_y = int(y + h / 2)
 
-                offset_x = cent_x0 - cent_x
-                offset_y = cent_y0 - cent_y
+                offset_x = cent_x0 - cent_x + offset_base
+                offset_y = cent_y0 - cent_y + offset_base
 
                 for x in range(bk_bs.shape[0]):
                     for y in range(bk_bs.shape[1]):
-                        bk[x + offset_x][y + offset_y] = bk_bs[x][y]
+                        if bk_bs[x][y] == 0:
+                            if x+offset_x < 0 or x+offset_x >= 400 or y+offset_y < 0 and y+offset_y >= 400 or \
+                                    x < 0 or x >= 400 or y < 0 or y >= 400:
+                                continue
+                            bk[x + offset_x][y + offset_y] = bk_bs[x][y]
 
                 break
 
         # load stroke images
-        # for s_id in similar_strokes.keys():
-        #
-        #     # get template stroke position
-        #     print(s_id)
-        #
-        #     temp_post = None
-        #     for stk_obj in ch_strokes_list:
-        #         if s_id == stk_obj.id:
-        #             temp_post = stk_obj.position
-        #             break
-        #
-        #     if temp_post == None:
-        #         print("Not find temp position!")
-        #         continue
-        #
-        #     cent_x0 = int(temp_post[0] + temp_post[2] / 2)
-        #     cent_y0 = int(temp_post[1] + temp_post[3] / 2)
-        #
-        #     path_ = similar_strokes[s_id][0]
-        #
-        #     img_ = cv2.imread(path_, 0)
-        #
-        #     x, y, w, h = getSingleMaxBoundingBoxOfImage(img_)
-        #
-        #     cent_x = int(x + w / 2)
-        #     cent_y = int(y + h / 2)
-        #
-        #     offset_x = cent_x - cent_x0
-        #     offset_y = cent_y - cent_y0
-        #
-        #     print(offset_x, offset_y)
-        #
-        #
-        #     for x in range(img_.shape[0]):
-        #         for y in range(img_.shape[1]):
-        #             if img_[x][y] == 0 and x+offset_x <= 255 and y+offset_y<= 255:
-        #                 bk[x+offset_x][y+offset_y] = 0
+        for s_id in similar_strokes.keys():
+
+            # get template stroke position
+            print(s_id)
+
+            real_post = None
+            for stk_obj in ch_strokes_list:
+                if s_id == stk_obj.id:
+                    real_post = stk_obj.position
+                    break
+
+            if real_post == None:
+                print("Not find temp position!")
+                continue
+
+            cent_x0 = int(real_post[0] + real_post[2] / 2)
+            cent_y0 = int(real_post[1] + real_post[3] / 2)
+
+            path_ = similar_strokes[s_id][0]
+            img_ = cv2.imread(path_, 0)
+            rect_ = getSingleMaxBoundingBoxOfImage(img_)
+
+            for x_ in range(rect_[2]):
+                for y_ in range(rect_[3]):
+                    if img_[rect_[1] + y_][rect_[0] + x_] == 0:
+                        bk[cent_y0 - int(rect_[3] / 2) + 72 + y_][cent_x0 - int(rect_[2] / 2) + 72 + x_] = \
+                            img_[rect_[1] + y_][rect_[0] + x_]
 
 
         generated_images.append(bk)
