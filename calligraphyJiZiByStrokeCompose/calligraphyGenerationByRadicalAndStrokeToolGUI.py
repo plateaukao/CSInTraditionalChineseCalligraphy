@@ -12,11 +12,16 @@ from xml.dom import minidom
 
 from calligraphyJiZiByStrokeCompose.mainwindow import Ui_MainWindow
 from calligraphyJiZiByStrokeCompose.util import load_basic_radicals_library_dataset, load_stroke_library_dataset, \
-    query_char_info_from_chars_list, query_similar_basic_radicals_and_strokes, recompose_chars
+    query_char_info_from_chars_list, query_similar_basic_radicals_and_strokes, render_generated_image
+
+from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage
+
 
 class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
     __library_root_path = "../../../Data/Calligraphy_database/char_generate_lib/"
+    library_bs_root_path = "../../../Data/Calligraphy_database/char_generate_lib/basic radicals dataset"
+    library_stroke_root_path = "../../../Data/Calligraphy_database/char_generate_lib/strokes dataset"
     __char_root_path = "/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775"
     __xml_dataset_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
 
@@ -24,6 +29,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
     __chars_info_list = []
     __chars_tag_list = []
+
+
 
     __chars_stroke_list = []
     __chars_basic_radicals_list = []
@@ -39,6 +46,19 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
     __select_strokes_dict = {}  # select strokes from similar basic radicals and strokes. used to draw result.
 
+    current_char_obj = None
+
+    current_bs_id = 0
+    current_bs_img_id = 0
+    current_stroke_id = 0
+    current_stroke_img_id = 0
+
+    select_char_id = 0
+
+    select_stroke_image_path = ""
+
+    similar_basic_radicals_dict = None
+    similar_strokes_dict = None
 
 
 
@@ -134,11 +154,15 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         print(qModelIndex.row())
         id_ = qModelIndex.row()
 
+        self.select_char_id = id_
+
         # get char object
         char_obj_ = self.__chars_info_list[id_]
+        self.current_char_obj = char_obj_
 
         # get similar basic radicals and strokes
         similar_basic_radicals_dict_, similar_strokes_dict_ = self.__similar_radicals_and_strokes_list[id_]
+        self.similar_basic_radicals_dict, self.similar_strokes_dict = self.__similar_radicals_and_strokes_list[id_]
 
         # update the basic radicals tree view
         self.handle_char_basic_radicals_treeview_update(self.target_basic_radicals_treeView, similar_basic_radicals_dict_)
@@ -150,30 +174,89 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         # select strokes to selected strokes
         for sk in char_obj_.strokes:
-            self.__select_strokes_dict[sk.id] = ""
+            self.__select_strokes_dict[int(sk.id)] = ""
 
-        # get all default basci radicals strokes
-        for k in similar_strokes_dict_.keys():
+        # get all default basic radicals strokes
+        for k in similar_basic_radicals_dict_.keys():
 
             # char bs strokes id
-            ch_bs_obj = char_obj_.basic_radicals[k]
-            ch_strokes_id = ch_bs_obj.strokes_id  # here!!!!!!!!
+            ch_bs_obj = None
+            for ch_bs in char_obj_.basic_radicals:
+                if ch_bs.id == k:
+                    ch_bs_obj = ch_bs
+            if ch_bs_obj is None:
+                continue
 
-            bs_obj = similar_strokes_dict_[k][0]    # first element of bs
+            ch_strokes_id = ch_bs_obj.strokes_id  # here!!!!!!!!
+            print("char strokes id: ", ch_strokes_id)
+
+            if len(similar_basic_radicals_dict_[k]) == 0:
+                continue
+
+            bs_obj = similar_basic_radicals_dict_[k][0]    # first element of bs
+            print(bs_obj)
+            print(type(bs_obj))
             bs_obj_path = bs_obj["path"]
             bs_obj_tag = bs_obj_path.split("/")[-1].split("_")[0]
             bs_obj_strokes_id = bs_obj["strokes_id"]
+            print("bs strokes id: ", bs_obj_strokes_id)
 
-            char_path_ = os.path.join(self.__char_root_path, bs_obj_tag, "strokes")
-            stroke_img_names_ = [f for f in os.listdir(char_path_) if ".png" in f]
+            bs_char_path_ = os.path.join(self.__char_root_path, bs_obj_tag, "strokes")
+            bs_stroke_img_names_ = [f for f in os.listdir(bs_char_path_) if ".png" in f]
 
+            if len(ch_strokes_id) != len(bs_obj_strokes_id):
+                print("char strokes id not same similar bs!")
+                continue
 
+            # find stroke path of similar bs
+            for i in range(len(ch_strokes_id)):
+                for bn in bs_stroke_img_names_:
+                    if "_" + str(bs_obj_strokes_id[i]) + "." in bn:
+                        self.__select_strokes_dict[int(ch_strokes_id[i])] = os.path.join(bs_char_path_, bn)
+                        break
+        print(self.__select_strokes_dict)
 
+        # get all default stroke
+        for k in similar_strokes_dict_.keys():
+            strokes_path_ = similar_strokes_dict_[k]
+            self.__select_strokes_dict[int(k)] = strokes_path_[0]
+        print(self.__select_strokes_dict)
 
         # recompose default basic radicals and strokes
+        size = 400
+        image = createBlankGrayscaleImageWithSize((size, size))
+        offset_base = int(abs(size - 256) / 2)
 
 
+        for key in self.__select_strokes_dict.keys():
 
+            # get real position of stroke
+            print(char_obj_.strokes)
+            real_post = char_obj_.strokes[int(key)].position
+
+            cent_x0 = int(real_post[0] + real_post[2] / 2)
+            cent_y0 = int(real_post[1] + real_post[3] / 2)
+
+            # get position of similar stroke
+            stroke_path = self.__select_strokes_dict[key]
+            stroke_img = cv2.imread(stroke_path, 0)
+            stroke_rect = getSingleMaxBoundingBoxOfImage(stroke_img)
+            if stroke_rect is None:
+                continue
+
+            for x in range(stroke_rect[2]):
+                for y in range(stroke_rect[3]):
+                    if stroke_img[stroke_rect[1] + y][stroke_rect[0] + x] == 0:
+                        image[cent_y0-int(stroke_rect[3]/2)+offset_base+y][cent_x0-int(stroke_rect[2]/2)+offset_base+x] = \
+                        stroke_img[stroke_rect[1] + y][stroke_rect[0] + x]
+
+        # display generated image
+        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.result_scene.addPixmap(qimg_pix_)
+        self.result_scene.setSceneRect(QRectF())
+        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.result_scene.update()
 
     def handle_char_basic_radicals_treeview_update(self, controls, similar_basic_radicals_dict, title="Similar basic radicals"):
         model = QStandardItemModel(controls)
@@ -197,7 +280,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         controls.setModel(model)
 
 
-
     def handle_char_strokes_treeview_update(self, controls, similar_strokes_dict, title="Similar strokes"):
         model = QStandardItemModel(controls)
         model.setColumnCount(1)
@@ -219,8 +301,112 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     def handle_char_basic_radicals_treeview_item_clicked(self, qModelIndex):
         print(qModelIndex.row())
 
+        bs_id = self.target_basic_radicals_treeView.currentIndex().parent().row()
+        bs_img_id = self.target_basic_radicals_treeView.currentIndex().row()
+        print(bs_id, " ", bs_img_id)
+
+        if bs_id == -1:
+            print("Clicked invalid content, not update the image!")
+            return
+
+        # update the stroke list
+        select_bs_dict = self.similar_basic_radicals_dict[str(bs_id)][bs_img_id]
+        print(select_bs_dict)
+        select_bs_strokes_id = select_bs_dict["strokes_id"]
+        select_bs_path = select_bs_dict["path"]
+        print("select strokes id: ", select_bs_strokes_id)
+
+        # real char strokes id
+        real_strokes_id = []
+        for bs in self.current_char_obj.basic_radicals:
+            if bs.id == str(bs_id):
+                real_strokes_id = bs.strokes_id
+        print("real strokes id: ", real_strokes_id)
+
+        if len(select_bs_strokes_id) != len(real_strokes_id):
+            print("select and real strokes id not same size!")
+            return
+
+        # find stroke names of select bs char
+        select_bs_char_tag = select_bs_path.split("/")[-1].split("_")[0]
+        select_bs_strokes_name = [f for f in os.listdir(os.path.join(self.__char_root_path, select_bs_char_tag, "strokes")) if ".png" in f]
+        print(select_bs_strokes_name)
+
+        for i in range(len(real_strokes_id)):
+            for sn in select_bs_strokes_name:
+                if "_" + str(select_bs_strokes_id[i]) + "." in sn:
+                    self.__select_strokes_dict[str(real_strokes_id[i])] = os.path.join(self.__char_root_path, select_bs_char_tag, "strokes", sn)
+
+        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict)
+        # display generated image
+        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.result_scene.addPixmap(qimg_pix_)
+        self.result_scene.setSceneRect(QRectF())
+        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.result_scene.update()
+
+        # display select bs
+        bs_img = cv2.imread(select_bs_path, 0)
+        qimg_ = QImage(bs_img.data, bs_img.shape[1], bs_img.shape[0], bs_img.shape[1], QImage.Format_Indexed8)
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.basic_radical_scene.addPixmap(qimg_pix_)
+        self.basic_radical_scene.setSceneRect(QRectF())
+        self.basic_radical_graphicsView.fitInView(self.basic_radical_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.basic_radical_scene.update()
+
+
+
+
+        # update the generated image
+
     def handle_char_strokes_tree_view_item_clicked(self, qModelIndex):
         print(qModelIndex.row())
+
+        # update the generated image
+        stroke_id = self.target_strokes_treeView.currentIndex().parent().row()
+        stroke_img_id = self.target_strokes_treeView.currentIndex().row()
+        print(stroke_id, " ", stroke_img_id)
+
+        # click invaild content of stroke_id, not update image
+        if stroke_id == -1:
+            print("Click invaild content, not update the image!")
+            return
+        # get the select stroke path
+        self.current_stroke_id = stroke_id
+        self.current_stroke_img_id = stroke_img_id
+
+        stroke_img_name = self.target_strokes_treeView.currentIndex().data()
+        print(stroke_id, " ", stroke_img_name)
+        stroke_type = stroke_img_name.split("_")[2]
+        stroke_img_path = os.path.join(self.library_stroke_root_path, stroke_type, stroke_img_name)
+        self.select_stroke_image_path = stroke_img_path
+        self.__select_strokes_dict[stroke_id] = stroke_img_path
+
+        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict)
+        # display generated image
+        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.result_scene.addPixmap(qimg_pix_)
+        self.result_scene.setSceneRect(QRectF())
+        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.result_scene.update()
+
+        # display select stroke image
+        stroke_img = cv2.imread(self.select_stroke_image_path, 0)
+        qimg_ = QImage(stroke_img.data, stroke_img.shape[1], stroke_img.shape[0], stroke_img.shape[1], QImage.Format_Indexed8)
+        qimg_pix_ = QPixmap.fromImage(qimg_)
+        self.stroke_scene.addPixmap(qimg_pix_)
+        self.stroke_scene.setSceneRect(QRectF())
+        self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
+        self.stroke_scene.update()
+
+
+
+
+
+
+
 
 
 

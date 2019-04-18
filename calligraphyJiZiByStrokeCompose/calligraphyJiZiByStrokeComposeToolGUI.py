@@ -25,6 +25,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     __chars_stroke_list = []
     __char_target_strokes_list = []
 
+    __char_obj = None
+
     __recomposed_results = []
     __recomposed_stroke_results = []
     __recomposed_results_index = []  # [char_id][stroke_image_ids]
@@ -151,6 +153,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.__char_id = index
         select_char_info = self.__chars_info_list[index]
         select_char_strokes = self.__char_target_strokes_list[index]
+
+        self.__char_obj = self.__chars_info_list[index]
 
         self.__target_char_strokes = []
         for lt in select_char_strokes:
