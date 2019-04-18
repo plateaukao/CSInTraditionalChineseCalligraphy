@@ -11,7 +11,7 @@ from PIL import Image
 from xml.dom import minidom
 
 from calligraphyJiZiByStrokeCompose.mainwindow import Ui_MainWindow
-from calligraphyJiZiByStrokeCompose.util import query_char_info, query_char_target_strokes, stroke_recompose, \
+from calligraphyJiZiByStrokeCompose.util import query_char_info_from_chars_list, query_char_target_strokes, stroke_recompose, \
                     load_stroke_library_dataset, query_char_info_from_chars_list, query_char_target_stroke_by_dataset, \
                     render_generated_image
 
