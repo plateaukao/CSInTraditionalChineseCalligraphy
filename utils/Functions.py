@@ -1872,6 +1872,19 @@ def createBlankRGBImage(image):
     return rgb
 
 
+def creatBlankRGBImageWithSize(size):
+    """
+    Create blank RGB image based on the size
+    :param size:
+    :return:
+    """
+    if size is None:
+        return
+    gray = createBlankGrayscaleImageWithSize(size)
+    rgb = cv2.cvtColor(gray, cv2.COLOR_GRAY2RGB)
+    return rgb
+
+
 # merge points on corner lines
 def merge_corner_lines_to_point(corner_line_points, contour_sorted):
     corner_points = []

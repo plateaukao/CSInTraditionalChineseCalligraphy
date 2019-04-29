@@ -8,8 +8,67 @@ import ast
 import cv2
 import timeit
 
-from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscaleImageWithSize
+from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscaleImageWithSize, creatBlankRGBImageWithSize
 from calligraphyJiZiByStrokeCompose.model import ChineseCharacter, BasicRadcial, Stroke
+
+
+def merge_gray_to_rgb_image(gray, rgb):
+    """
+    Merge gray image to RGB image.
+    :param gray:
+    :param rgb:
+    :return:
+    """
+    for y in range(gray.shape[0]):
+        for x in range(gray.shape[1]):
+            if gray[y][x] == 0:
+                rgb[y][x] = (0, 0, 0)
+    return rgb
+
+
+def create_grid_image_rgb(type, size):
+    """
+    Creat RGB image with different types of grid: 九宫格，米字格 and 田字格
+    :param type:
+    :param size:
+    :return:
+    """
+
+    bk = creatBlankRGBImageWithSize(size)
+
+    if type == "九宫格":
+        tx = int(size[0] / 3)
+        bx = int(size[0] / 3) * 2
+
+        ly = int(size[1] / 3)
+        ry = int(size[1] / 3) * 2
+
+        cv2.line(bk, (0, tx), (size[0]-1, tx), (0, 0, 255), 1)
+        cv2.line(bk, (0, bx), (size[0]-1, bx), (0, 0, 255), 1)
+
+        cv2.line(bk, (ly, 0), (ly, size[1]-1), (0, 0, 255), 1)
+        cv2.line(bk, (ry, 0), (ry, size[1]-1), (0, 0, 255), 1)
+
+    elif type == "米字格":
+        mx = int(size[0] / 2)
+        my = int(size[1] / 2)
+
+        cv2.line(bk, (0, mx), (size[0]-1, mx), (0, 0, 255), 1)
+        cv2.line(bk, (my, 0), (my, size[1]-1), (0, 0, 255), 1)
+
+        cv2.line(bk, (0, 0), (size[0]-1, size[1]-1), (0, 0, 255), 1)
+        cv2.line(bk, (size[1]-1, 0), (0, size[0]-1), (0, 0, 255), 1)
+
+    elif type == "田字格":
+        mx = int(size[0] / 2)
+        my = int(size[1] / 2)
+
+        cv2.line(bk, (0, mx), (size[0] - 1, mx), (0, 0, 255), 1)
+        cv2.line(bk, (my, 0), (my, size[1] - 1), (0, 0, 255), 1)
+
+    return bk
+
+
 
 
 def render_generated_image(char_obj, select_strokes_dict, size=400):

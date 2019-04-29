@@ -362,7 +362,7 @@
       <height>91</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <layout class="QVBoxLayout" name="radioButton_layout">
      <item>
       <widget class="QRadioButton" name="radioButton_jiugong_grid">
        <property name="text">

@@ -10,9 +10,11 @@ from xml.dom import minidom
 
 from calligraphyJiZiByStrokeCompose.mainwindow import Ui_MainWindow
 from calligraphyJiZiByStrokeCompose.util import load_basic_radicals_library_dataset, load_stroke_library_dataset, \
-    query_char_info_from_chars_list, query_similar_basic_radicals_and_strokes, render_generated_image
+    query_char_info_from_chars_list, query_similar_basic_radicals_and_strokes, render_generated_image, \
+    create_grid_image_rgb, merge_gray_to_rgb_image
 
-from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage
+from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage, \
+    creatBlankRGBImageWithSize, rgb2qimage
 
 SIZE = 400
 
@@ -59,6 +61,13 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     similar_basic_radicals_dict = None
     similar_strokes_dict = None
 
+    current_char_gray = None
+    current_basic_radical_gray = None
+    current_stroke_gray = None
+
+    # gird bk
+    grid_bk_image = None    # RGB image of grid
+
     def __init__(self):
         super(CalligraphyJiZiByStrokeCompse, self).__init__()
         self.setupUi(self)
@@ -86,6 +95,16 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.stroke_scene.setSceneRect(QRectF())
         self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
 
+        # grid radio button
+        self.radioButton_layout = QGridLayout()
+        self.radioButton_jiugong_grid.setChecked(True)
+        self.radioButton_jiugong_grid.toggled.connect(lambda: self.handle_radio_button_clicked(self.radioButton_jiugong_grid))
+
+        self.radioButton_mizi_grid.toggled.connect(lambda: self.handle_radio_button_clicked(self.radioButton_mizi_grid))
+        self.radioButton_tianzi_grid.toggled.connect(lambda: self.handle_radio_button_clicked(self.radioButton_tianzi_grid))
+
+        # create default grid image
+        self.grid_bk_image = create_grid_image_rgb("九宫格", (SIZE, SIZE))
 
         self.set_pushButton.clicked.connect(self.handle_load_library_btn)
 
@@ -223,6 +242,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             os.system('rm {}'.format(bmp_img_path))
             os.system('rm {}'.format(svg_img_path))
 
+            del stroke_img, bk_, img_, dom, root
+
         svg_content += '</g></svg>'
 
         # save to svg file
@@ -330,12 +351,20 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
                         image[cent_y0-int(stroke_rect[3]/2)+offset_base+y][cent_x0-int(stroke_rect[2]/2)+offset_base+x] = \
                         stroke_img[stroke_rect[1] + y][stroke_rect[0] + x]
 
+        self.current_char_gray = image.copy()
+
+        # add grid lines
+        bk_with_grids_rgb_img = self.grid_bk_image.copy()
+        bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_char_gray, bk_with_grids_rgb_img)
+
         # display generated image
-        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_ = rgb2qimage(bk_with_grids_rgb_img)
         qimg_pix_ = QPixmap.fromImage(qimg_)
 
         # render image display of generated results
         self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
+        del current_char_obj_, similar_basic_radicals_dict_, similar_strokes_dict_, image, stroke_img, \
+            bk_with_grids_rgb_img
 
     def handle_char_basic_radicals_treeview_update(self, controls, similar_basic_radicals_dict,
                                                    title="Similar basic radicals"):
@@ -434,9 +463,14 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         print("selected strokes len: ", len(self.__select_strokes_dict))
 
         image = render_generated_image(self.current_char_obj, self.__select_strokes_dict, size=SIZE)
+        self.current_char_gray = image.copy()
+
+        # add grid lines to generated results
+        bk_with_grids_rgb_img = self.grid_bk_image.copy()
+        bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_char_gray, bk_with_grids_rgb_img)
 
         # display generated image
-        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_ = rgb2qimage(bk_with_grids_rgb_img)
         qimg_pix_ = QPixmap.fromImage(qimg_)
         self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
 
@@ -445,9 +479,18 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         bs_img = cv2.imread(select_bs_path, 0)
         offset = int((SIZE - bs_img.shape[0]) / 2)
         bs_bk[offset: offset+bs_img.shape[0], offset: offset+bs_img.shape[1]] = bs_img
-        qimg_ = QImage(bs_bk.data, bs_bk.shape[1], bs_bk.shape[0], bs_bk.shape[1], QImage.Format_Indexed8)
+
+        self.current_basic_radical_gray = bs_bk.copy()
+
+        # add grid lines to basic radical
+        bk_with_grids_rgb_img = self.grid_bk_image.copy()
+        bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_basic_radical_gray, bk_with_grids_rgb_img)
+
+        qimg_ = rgb2qimage(bk_with_grids_rgb_img)
         qimg_pix_ = QPixmap.fromImage(qimg_)
         self.render_image_display(qimg_pix_, self.basic_radical_graphicsView, self.basic_radical_scene)
+
+        del select_bs_dict, image, bk_with_grids_rgb_img, qimg_, qimg_pix_, bs_bk, bs_img
 
     def handle_char_strokes_tree_view_item_clicked(self, qModelIndex):
         """
@@ -478,8 +521,15 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.__select_strokes_dict[stroke_id] = stroke_img_path
 
         image = render_generated_image(self.current_char_obj, self.__select_strokes_dict, size=SIZE)
+
+        self.current_char_gray = image.copy()
+
+        # add grid lines
+        bk_with_grids_rgb_img = self.grid_bk_image.copy()
+        bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_char_gray, bk_with_grids_rgb_img)
+
         # display generated image
-        qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
+        qimg_ = rgb2qimage(bk_with_grids_rgb_img)
         qimg_pix_ = QPixmap.fromImage(qimg_)
         self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
 
@@ -488,9 +538,76 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         stroke_img = cv2.imread(self.select_stroke_image_path, 0)
         offset = int((SIZE - stroke_img.shape[0]) / 2)
         stroke_bk[offset: offset+stroke_img.shape[0], offset: offset+stroke_img.shape[1]] = stroke_img
-        qimg_ = QImage(stroke_bk.data, stroke_bk.shape[1], stroke_bk.shape[0], stroke_bk.shape[1], QImage.Format_Indexed8)
+
+        self.current_stroke_gray = stroke_bk.copy()
+        # add grid lines
+        bk_with_grids_rgb_img = self.grid_bk_image.copy()
+        bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_stroke_gray, bk_with_grids_rgb_img)
+
+        qimg_ = rgb2qimage(bk_with_grids_rgb_img)
         qimg_pix_ = QPixmap.fromImage(qimg_)
         self.render_image_display(qimg_pix_, self.stroke_graphicsView, self.stroke_scene)
+
+        del image, bk_with_grids_rgb_img, qimg_, qimg_pix_, stroke_bk, stroke_img
+
+    def handle_radio_button_clicked(self, btn):
+        """
+        Grid radio button clicked!
+        :param btn:
+        :return:
+        """
+        # print("Text: ", btn.text())
+        if btn.text() == "九宫格":
+            if btn.isChecked() == True:
+                print("九宫格 button clicked!")
+                self.grid_bk_image = create_grid_image_rgb("九宫格", (SIZE, SIZE))
+                self.update_image_display()
+        elif btn.text() == "米字格":
+            if btn.isChecked() == True:
+                print("米字格 button clicked!")
+                self.grid_bk_image = create_grid_image_rgb("米字格", (SIZE, SIZE))
+                self.update_image_display()
+        elif btn.text() == "田字格":
+            if btn.isChecked() == True:
+                print("田字格 button clicke!")
+                self.grid_bk_image = create_grid_image_rgb("田字格", (SIZE, SIZE))
+                self.update_image_display()
+
+    def update_image_display(self):
+        """
+        Update image display
+        :return:
+        """
+        if self.current_char_gray is not None:
+            bk_with_grids_rgb_img = self.grid_bk_image.copy()
+            bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_char_gray, bk_with_grids_rgb_img)
+
+            # display generated image
+            qimg_ = rgb2qimage(bk_with_grids_rgb_img)
+            qimg_pix_ = QPixmap.fromImage(qimg_)
+            self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
+
+        if self.current_basic_radical_gray is not None:
+            bk_with_grids_rgb_img = self.grid_bk_image.copy()
+            bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_basic_radical_gray, bk_with_grids_rgb_img)
+
+            # display generated image
+            qimg_ = rgb2qimage(bk_with_grids_rgb_img)
+            qimg_pix_ = QPixmap.fromImage(qimg_)
+            self.render_image_display(qimg_pix_, self.basic_radical_graphicsView, self.basic_radical_scene)
+
+        if self.current_stroke_gray is not None:
+            bk_with_grids_rgb_img = self.grid_bk_image.copy()
+            bk_with_grids_rgb_img = merge_gray_to_rgb_image(self.current_stroke_gray, bk_with_grids_rgb_img)
+
+            # display generated image
+            qimg_ = rgb2qimage(bk_with_grids_rgb_img)
+            qimg_pix_ = QPixmap.fromImage(qimg_)
+            self.render_image_display(qimg_pix_, self.stroke_graphicsView, self.stroke_scene)
+
+        del bk_with_grids_rgb_img, qimg_pix_, qimg_
+
+
 
     def render_image_display(self, image_pixmap, graphics_view, scene):
         """
