@@ -1,9 +1,7 @@
 # coding: utf-8
 import sys
-import math
 import cv2
 import os
-import numpy as np
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *

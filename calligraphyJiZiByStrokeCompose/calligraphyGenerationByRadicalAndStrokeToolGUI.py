@@ -1,9 +1,7 @@
 # coding: utf-8
 import sys
-import math
 import cv2
 import os
-import numpy as np
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -16,6 +14,8 @@ from calligraphyJiZiByStrokeCompose.util import load_basic_radicals_library_data
 
 from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage
 
+SIZE = 400
+
 
 class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
@@ -23,14 +23,13 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     library_bs_root_path = "../../../Data/Calligraphy_database/char_generate_lib/basic radicals dataset"
     library_stroke_root_path = "../../../Data/Calligraphy_database/char_generate_lib/strokes dataset"
     __char_root_path = "/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775"
-    __xml_dataset_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
+    __xml_dataset_path = "../../../Data/Characters/" \
+                         "radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
 
     __input_content = ""
 
     __chars_info_list = []
     __chars_tag_list = []
-
-
 
     __chars_stroke_list = []
     __chars_basic_radicals_list = []
@@ -60,10 +59,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
     similar_basic_radicals_dict = None
     similar_strokes_dict = None
 
-
-
-
-
     def __init__(self):
         super(CalligraphyJiZiByStrokeCompse, self).__init__()
         self.setupUi(self)
@@ -92,7 +87,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
 
 
-
         self.set_pushButton.clicked.connect(self.handle_load_library_btn)
 
         self.load_dataset_thread = LoadDatasetThread()
@@ -104,14 +98,22 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.target_basic_radicals_treeView.clicked.connect(self.handle_char_basic_radicals_treeview_item_clicked)
         self.target_strokes_treeView.clicked.connect(self.handle_char_strokes_tree_view_item_clicked)
 
-
     def handle_load_library_btn(self):
+        """
+        Load data set button click!
+        :return:
+        """
         print("Load library button clicked!")
 
         self.load_dataset_thread.start()
         self.statusbar.showMessage("Begin to load basic radicals and strokes dataset.....")
 
     def handle_load_library_thread(self, dataset):
+        """
+        Thread for loading basic radicals and strokes dataset.
+        :param dataset:
+        :return:
+        """
         if dataset:
             self.__strokes_dataset = dataset["strokes"]
             self.__basic_radicals_dataset = dataset["basic_radicals"]
@@ -121,6 +123,10 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             self.statusbar.showMessage("Load basic radicals and strokes dataset failed!")
 
     def handle_generate_btn(self):
+        """
+        Generate button
+        :return:
+        """
         print("Generate button clicked!")
 
         # Process the input content: remove space, no-chinese characters
@@ -139,14 +145,15 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         # update the chars listview
         self.chars_tag_slm.setStringList(self.__chars_tag_list)
 
-        # # find similar basic radicals and strokes
+        # find similar basic radicals and strokes
         self.__similar_radicals_and_strokes_list = query_similar_basic_radicals_and_strokes(self.__basic_radicals_dataset, self.__strokes_dataset,
                                                                  self.__chars_info_list)
-        print("Similar chars len: ", len(self.__similar_radicals_and_strokes_list))
-
-
 
     def handle_SVG_extraction_btn(self):
+        """
+        SVG file extraction button.
+        :return:
+        """
         print("SVG extraction button clicked")
 
         temp_path = './temp'
@@ -159,14 +166,32 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
                       '"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd"> <svg version="1.0" xmlns="http://www.w3.org/2000/svg" ' \
                       'width="400.000000pt" height="400.000000pt" viewBox="0 0 400.000000 400.000000" preserveAspectRatio="xMidYMid meet"> ' \
                       '<g transform="translate(0.000000,400.000000) scale(0.100000,-0.100000)" fill="#000000" stroke="none"> \n'
+        print("select strokes len: ", len(self.__select_strokes_dict))
         for key in self.__select_strokes_dict.keys():
             stroke_img_path = self.__select_strokes_dict[key]
 
             stroke_img = cv2.imread(stroke_img_path, 0)
+            stroke_rect = getSingleMaxBoundingBoxOfImage(stroke_img)
+
+            real_post = self.current_char_obj.strokes[int(key)].position
+            cent_x0 = int(real_post[0] + real_post[2] / 2)
+            cent_y0 = int(real_post[1] + real_post[3] / 2)
+
+            # merge (256, 256) to (400, 400)
+            bk_ = createBlankGrayscaleImageWithSize((SIZE, SIZE))
+            offset = int((SIZE - stroke_img.shape[0]) / 2)
+
+            for x in range(stroke_rect[2]):
+                for y in range(stroke_rect[3]):
+                    if stroke_img[stroke_rect[1]+y][stroke_rect[0]+x] == 0:
+                        bk_[cent_y0-int(stroke_rect[3]/2)+offset+y][cent_x0-int(stroke_rect[2]/2)+offset+x] = \
+                        stroke_img[stroke_rect[1]+y][stroke_rect[0]+x]
+
+            # bk_[offset: offset+stroke_img.shape[0], offset: offset+stroke_img.shape[1]] = stroke_img
 
             # save narray to png
             png_img_path = os.path.join(temp_path, "stroke_{}.png".format(key))
-            cv2.imwrite(png_img_path, stroke_img)
+            cv2.imwrite(png_img_path, bk_)
 
             # convert png to bmp
             bmp_img_path = os.path.join(temp_path, "stroke_{}.bmp".format(key))
@@ -200,18 +225,22 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         svg_content += '</g></svg>'
 
+        # save to svg file
         with open(os.path.join(filename, self.current_char_obj.tag + ".svg"), 'w') as f:
             f.write(svg_content)
 
     def handle_chars_tag_listview_item_clicked(self, qModelIndex):
-        print(qModelIndex.row())
+        """
+        Char list view item clicked!
+        :param qModelIndex:
+        :return:
+        """
         id_ = qModelIndex.row()
-
         self.select_char_id = id_
 
         # get char object
-        char_obj_ = self.__chars_info_list[id_]
-        self.current_char_obj = char_obj_
+        current_char_obj_ = self.__chars_info_list[id_]
+        self.current_char_obj = current_char_obj_
 
         # get similar basic radicals and strokes
         similar_basic_radicals_dict_, similar_strokes_dict_ = self.__similar_radicals_and_strokes_list[id_]
@@ -226,7 +255,8 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.target_strokes_treeView.expandAll()
 
         # select strokes to selected strokes
-        for sk in char_obj_.strokes:
+        self.__select_strokes_dict = {}     # should clean the cache first!!!!
+        for sk in current_char_obj_.strokes:
             self.__select_strokes_dict[int(sk.id)] = ""
 
         # get all default basic radicals strokes
@@ -234,7 +264,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
             # char bs strokes id
             ch_bs_obj = None
-            for ch_bs in char_obj_.basic_radicals:
+            for ch_bs in current_char_obj_.basic_radicals:
                 if ch_bs.id == k:
                     ch_bs_obj = ch_bs
             if ch_bs_obj is None:
@@ -247,8 +277,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
                 continue
 
             bs_obj = similar_basic_radicals_dict_[k][0]    # first element of bs
-            print(bs_obj)
-            print(type(bs_obj))
+
             bs_obj_path = bs_obj["path"]
             bs_obj_tag = bs_obj_path.split("/")[-1].split("_")[0]
             bs_obj_strokes_id = bs_obj["strokes_id"]
@@ -276,16 +305,14 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         print(self.__select_strokes_dict)
 
         # recompose default basic radicals and strokes
-        size = 400
-        image = createBlankGrayscaleImageWithSize((size, size))
-        offset_base = int(abs(size - 256) / 2)
-
+        image = createBlankGrayscaleImageWithSize((SIZE, SIZE))
+        offset_base = int(abs(SIZE - 256) / 2)
 
         for key in self.__select_strokes_dict.keys():
 
             # get real position of stroke
-            print(char_obj_.strokes)
-            real_post = char_obj_.strokes[int(key)].position
+            print(current_char_obj_.strokes)
+            real_post = current_char_obj_.strokes[int(key)].position
 
             cent_x0 = int(real_post[0] + real_post[2] / 2)
             cent_y0 = int(real_post[1] + real_post[3] / 2)
@@ -306,12 +333,19 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         # display generated image
         qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
         qimg_pix_ = QPixmap.fromImage(qimg_)
-        self.result_scene.addPixmap(qimg_pix_)
-        self.result_scene.setSceneRect(QRectF())
-        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
-        self.result_scene.update()
 
-    def handle_char_basic_radicals_treeview_update(self, controls, similar_basic_radicals_dict, title="Similar basic radicals"):
+        # render image display of generated results
+        self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
+
+    def handle_char_basic_radicals_treeview_update(self, controls, similar_basic_radicals_dict,
+                                                   title="Similar basic radicals"):
+        """
+        Basic radical tree view update!
+        :param controls:
+        :param similar_basic_radicals_dict:
+        :param title:
+        :return:
+        """
         model = QStandardItemModel(controls)
         model.setColumnCount(1)
 
@@ -332,8 +366,14 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             model.setItem(int(k), 0, bs_root_item)
         controls.setModel(model)
 
-
     def handle_char_strokes_treeview_update(self, controls, similar_strokes_dict, title="Similar strokes"):
+        """
+        Stroke tree view update!
+        :param controls:
+        :param similar_strokes_dict:
+        :param title:
+        :return:
+        """
         model = QStandardItemModel(controls)
         model.setColumnCount(1)
 
@@ -350,8 +390,12 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             model.setItem(int(k), 0, sk_root_item)
         controls.setModel(model)
 
-
     def handle_char_basic_radicals_treeview_item_clicked(self, qModelIndex):
+        """
+        Basic radical tree view item clicked!
+        :param qModelIndex:
+        :return:
+        """
         print(qModelIndex.row())
 
         bs_id = self.target_basic_radicals_treeView.currentIndex().parent().row()
@@ -364,7 +408,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         # update the stroke list
         select_bs_dict = self.similar_basic_radicals_dict[str(bs_id)][bs_img_id]
-        print(select_bs_dict)
         select_bs_strokes_id = select_bs_dict["strokes_id"]
         select_bs_path = select_bs_dict["path"]
         print("select strokes id: ", select_bs_strokes_id)
@@ -383,37 +426,35 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         # find stroke names of select bs char
         select_bs_char_tag = select_bs_path.split("/")[-1].split("_")[0]
         select_bs_strokes_name = [f for f in os.listdir(os.path.join(self.__char_root_path, select_bs_char_tag, "strokes")) if ".png" in f]
-        print(select_bs_strokes_name)
 
         for i in range(len(real_strokes_id)):
             for sn in select_bs_strokes_name:
                 if "_" + str(select_bs_strokes_id[i]) + "." in sn:
-                    self.__select_strokes_dict[str(real_strokes_id[i])] = os.path.join(self.__char_root_path, select_bs_char_tag, "strokes", sn)
+                    self.__select_strokes_dict[real_strokes_id[i]] = os.path.join(self.__char_root_path, select_bs_char_tag, "strokes", sn)
+        print("selected strokes len: ", len(self.__select_strokes_dict))
 
-        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict)
+        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict, size=SIZE)
+
         # display generated image
         qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
         qimg_pix_ = QPixmap.fromImage(qimg_)
-        self.result_scene.addPixmap(qimg_pix_)
-        self.result_scene.setSceneRect(QRectF())
-        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
-        self.result_scene.update()
+        self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
 
         # display select bs
+        bs_bk = createBlankGrayscaleImageWithSize((SIZE, SIZE))
         bs_img = cv2.imread(select_bs_path, 0)
-        qimg_ = QImage(bs_img.data, bs_img.shape[1], bs_img.shape[0], bs_img.shape[1], QImage.Format_Indexed8)
+        offset = int((SIZE - bs_img.shape[0]) / 2)
+        bs_bk[offset: offset+bs_img.shape[0], offset: offset+bs_img.shape[1]] = bs_img
+        qimg_ = QImage(bs_bk.data, bs_bk.shape[1], bs_bk.shape[0], bs_bk.shape[1], QImage.Format_Indexed8)
         qimg_pix_ = QPixmap.fromImage(qimg_)
-        self.basic_radical_scene.addPixmap(qimg_pix_)
-        self.basic_radical_scene.setSceneRect(QRectF())
-        self.basic_radical_graphicsView.fitInView(self.basic_radical_scene.sceneRect(), Qt.KeepAspectRatio)
-        self.basic_radical_scene.update()
-
-
-
-
-        # update the generated image
+        self.render_image_display(qimg_pix_, self.basic_radical_graphicsView, self.basic_radical_scene)
 
     def handle_char_strokes_tree_view_item_clicked(self, qModelIndex):
+        """
+        Stroke tree view item clicked!
+        :param qModelIndex:
+        :return:
+        """
         print(qModelIndex.row())
 
         # update the generated image
@@ -436,34 +477,39 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.select_stroke_image_path = stroke_img_path
         self.__select_strokes_dict[stroke_id] = stroke_img_path
 
-        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict)
+        image = render_generated_image(self.current_char_obj, self.__select_strokes_dict, size=SIZE)
         # display generated image
         qimg_ = QImage(image.data, image.shape[1], image.shape[0], image.shape[1], QImage.Format_Indexed8)
         qimg_pix_ = QPixmap.fromImage(qimg_)
-        self.result_scene.addPixmap(qimg_pix_)
-        self.result_scene.setSceneRect(QRectF())
-        self.result_graphicsView.fitInView(self.result_scene.sceneRect(), Qt.KeepAspectRatio)
-        self.result_scene.update()
+        self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
 
         # display select stroke image
+        stroke_bk = createBlankGrayscaleImageWithSize((SIZE, SIZE))
         stroke_img = cv2.imread(self.select_stroke_image_path, 0)
-        qimg_ = QImage(stroke_img.data, stroke_img.shape[1], stroke_img.shape[0], stroke_img.shape[1], QImage.Format_Indexed8)
+        offset = int((SIZE - stroke_img.shape[0]) / 2)
+        stroke_bk[offset: offset+stroke_img.shape[0], offset: offset+stroke_img.shape[1]] = stroke_img
+        qimg_ = QImage(stroke_bk.data, stroke_bk.shape[1], stroke_bk.shape[0], stroke_bk.shape[1], QImage.Format_Indexed8)
         qimg_pix_ = QPixmap.fromImage(qimg_)
-        self.stroke_scene.addPixmap(qimg_pix_)
-        self.stroke_scene.setSceneRect(QRectF())
-        self.stroke_graphicsView.fitInView(self.stroke_scene.sceneRect(), Qt.KeepAspectRatio)
-        self.stroke_scene.update()
+        self.render_image_display(qimg_pix_, self.stroke_graphicsView, self.stroke_scene)
 
-
-
-
-
-
-
-
+    def render_image_display(self, image_pixmap, graphics_view, scene):
+        """
+        Render image display
+        :param image_pixmap:
+        :param graphics_view:
+        :param scene:
+        :return:
+        """
+        scene.addPixmap(image_pixmap)
+        scene.setSceneRect(QRectF())
+        graphics_view.fitInView(scene.sceneRect(), Qt.KeepAspectRatio)
+        scene.update()
 
 
 class LoadDatasetThread(QThread):
+    """
+    Thread for loading dataset.
+    """
     signal = pyqtSignal(object)
 
     def __init__(self):

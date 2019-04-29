@@ -12,15 +12,16 @@ from utils.Functions import getSingleMaxBoundingBoxOfImage, createBlankGrayscale
 from calligraphyJiZiByStrokeCompose.model import ChineseCharacter, BasicRadcial, Stroke
 
 
-def render_generated_image(char_obj, select_strokes_dict):
-    size = 400
+def render_generated_image(char_obj, select_strokes_dict, size=400):
     image = createBlankGrayscaleImageWithSize((size, size))
     offset_base = int(abs(size - 256) / 2)
 
     for key in select_strokes_dict.keys():
 
+        print(key, " ", len(select_strokes_dict[key]))
+        print(type(key))
+
         # get real position of stroke
-        print(char_obj.strokes)
         real_post = char_obj.strokes[int(key)].position
 
         cent_x0 = int(real_post[0] + real_post[2] / 2)
@@ -55,12 +56,12 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
     """
     if basic_radicals_dataset is None or strokes_dataset is None:
         print("Basic radical dataset or stroke dataset should not be None!")
-        return
+        return []
     if char_info_list is None or len(char_info_list) == 0:
         print("Char info list should not be None!")
-        return
+        return []
 
-    # iterative search char infor
+    # iterative search char info
     similar_chars = []
     for ch_id in range(len(char_info_list)):
         ch_obj = char_info_list[ch_id]
@@ -74,7 +75,7 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
         ch_radicals = ch_obj.basic_radicals
 
         if len(ch_radicals) > 0:
-            # this char has basic radical
+            # this char has basic radicals
             for bs_id in range(len(ch_radicals)):
                 bs_obj = ch_radicals[bs_id]
                 bs_obj_post = bs_obj.position.replace("[", "").replace("]", "").replace(" ", "").split(",")
@@ -103,7 +104,8 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                         sim_bs_dict = {}
 
                         # rule1
-                        if abs(x - bs_obj_post[0]) <= 5 and abs(y - bs_obj_post[1]) <= 5 and abs(w - bs_obj_post[2]) <= 5 and abs(h - bs_obj_post[3]) <= 5:
+                        if abs(x - bs_obj_post[0]) <= 5 and abs(y - bs_obj_post[1]) <= 5 and abs(w - bs_obj_post[2]) \
+                                <= 5 and abs(h - bs_obj_post[3]) <= 5:
                             sim_bs_dict["path"] = bsl.image_path
 
                             # target bs obj strokes id
@@ -117,9 +119,6 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                                 for bs_ in targ_bs_obj.basic_radicals:
                                     if bs_.id == bsl_id:
                                         sim_bs_dict["strokes_id"] = bs_.strokes_id
-
-                                print("sim strokes id: ", sim_bs_dict["strokes_id"])
-
                             sim_bs_dict["position"] = (x, y, w, h)
 
                             similar_bss.append(sim_bs_dict)
@@ -163,7 +162,8 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
 
 
 
-def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775", size=400):
+def recompose_chars(chars_info_list, similar_chars,
+                    char_root_path="/Users/liupeng/Documents/Data/Calligraphy_database/Chars_775", size=400):
     """
     Recompose chars to 400 x 400 image from 256 x 256 to avoid out of size of image (256, 256)
     :param chars_info_list:
@@ -230,7 +230,8 @@ def recompose_chars(chars_info_list, similar_chars, char_root_path="/Users/liupe
         for bs_id in similar_bs_dict.keys():
             for bs_obj in similar_bs_dict[bs_id]:
 
-                bk_bs = createBlankGrayscaleImageWithSize((size, size))  # merge strokes of this basic radical together to get single connected component
+                # merge strokes of this basic radical together to get single connected component
+                bk_bs = createBlankGrayscaleImageWithSize((size, size))
 
                 stroke_objs = bs_obj["strokes"]
                 post_ = bs_obj["position"]
@@ -366,7 +367,8 @@ def find_most_match_stroke(position, paths, alpha=0.8):
         ssim_distance_dict[i] = similar_dist
 
     # sort the size and location similar distance
-    ssim_distance_dict_sorted = [(k, ssim_distance_dict[k]) for k in sorted(ssim_distance_dict, key=ssim_distance_dict.get)]
+    ssim_distance_dict_sorted = [(k, ssim_distance_dict[k]) for k in sorted(ssim_distance_dict,
+                                                                            key=ssim_distance_dict.get)]
 
     most_similar_stroke_id = ssim_distance_dict_sorted[0][0]
     print("most ssim distance: ", ssim_distance_dict_sorted[0][1])
@@ -472,6 +474,12 @@ def query_char_info_from_chars_list(chars, xml_path="../../../Data/Characters/ra
 
 
 def query_char_info_from_char(char, root):
+    """
+    Get char info object
+    :param char:
+    :param root:
+    :return:
+    """
     if char == '':
         return []
     if root is None or len(root) <= 0:
@@ -546,7 +554,7 @@ def query_char_info_from_char(char, root):
                         bs_stk_elems = bs_strokes_elems[0].findall("STROKE")
                         if bs_stk_elems:
                             for bs_stk in bs_stk_elems:
-                                bs_stroke_id = bs_stk.attrib["ID"]
+                                bs_stroke_id = int(bs_stk.attrib["ID"])
                                 bs_strokes_id.append(bs_stroke_id)
 
                     bs_obj = BasicRadcial(id=bs_id, tag=bs_tag, path="", position=bs_post, strokes_id=bs_strokes_id)
