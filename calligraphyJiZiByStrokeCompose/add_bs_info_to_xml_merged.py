@@ -5,14 +5,14 @@ import xml.etree.ElementTree as ET
 
 from utils.Functions import getSingleMaxBoundingBoxOfImage, prettyXml
 
-char_775_path = '../../../Data/Calligraphy_database/Chars_775'
-char_1000_path = '../../../Data/Calligraphy_database/Chars_1000'
+# char_775_path = '../../../Data/Calligraphy_database/Chars_775'
+# char_1000_path = '../../../Data/Calligraphy_database/Chars_1000'
 
 char_merged = "../../../Data/Calligraphy_database/Chars_merged"
 
-xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
+xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
 
-save_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
+save_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals_merged.xml"
 
 
 def add_basic_radical_info_to_xml(root, path):
@@ -28,6 +28,9 @@ def add_basic_radical_info_to_xml(root, path):
         if len(tag) > 1:
             continue
         if not tag in filenames:
+            continue
+
+        if element.findall("BASIC_RADICALS") is not None:
             continue
 
         # add basic radicals element
@@ -96,8 +99,8 @@ if __name__ == '__main__':
     root = tree.getroot()
     print("root len:", len(root))
 
-    root = add_basic_radical_info_to_xml(root, char_775_path)
-    root = add_basic_radical_info_to_xml(root, char_1000_path)
+    # root = add_basic_radical_info_to_xml(root, char_775_path)
+    root = add_basic_radical_info_to_xml(root, char_merged)
 
     prettyXml(root, '\t', '\n')
     tree.write(save_path, encoding='utf-8')
