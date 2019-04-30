@@ -168,7 +168,6 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                             sim_bs_dict["path"] = bsl.image_path
 
                             # target bs obj strokes id
-                            print("bsl tag: ", bsl_tag)
                             targ_bs_obj_list = query_char_info_from_chars_list([bsl_tag])
                             if len(targ_bs_obj_list) == 0:
                                 print("template bs objs not found!")
@@ -184,8 +183,6 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
 
                 similar_basic_radicals[bs_obj_id] = similar_bss
 
-        print(similar_basic_radicals)
-
         # identify the found strokes in found basic radical
         for bs_id in similar_basic_radicals.keys():
             if len(similar_basic_radicals[bs_id]) > 0:
@@ -195,7 +192,6 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
                     if bs_id == bs.id:
                       found_stroke_id += bs.strokes_id
         found_stroke_id = [int(f) for f in found_stroke_id]
-        print(found_stroke_id)
 
         # find similar strokes for those not found strokes
         for sk in ch_obj.strokes:
@@ -216,9 +212,6 @@ def query_similar_basic_radicals_and_strokes(basic_radicals_dataset, strokes_dat
         similar_chars.append((similar_basic_radicals, similar_strokes))
 
     return similar_chars
-
-
-
 
 
 def recompose_chars(chars_info_list, similar_chars,
@@ -430,7 +423,6 @@ def find_most_match_stroke(position, paths, alpha=0.8):
                                                                             key=ssim_distance_dict.get)]
 
     most_similar_stroke_id = ssim_distance_dict_sorted[0][0]
-    print("most ssim distance: ", ssim_distance_dict_sorted[0][1])
 
     return paths[most_similar_stroke_id]
 
@@ -490,7 +482,7 @@ def find_similar_strokes(type, position, strokes_dataset):
         print("Sorted condition is null!")
 
     sorted_condition_sorted = sorted(sorted_condition.items(), key=lambda x: x[1])
-    print(sorted_condition_sorted)
+
     for s in sorted_condition_sorted:
         if s[1] > THRESHOLD_CONDITION:
             break
@@ -617,8 +609,6 @@ def query_char_info_from_char(char, root):
                                 bs_strokes_id.append(bs_stroke_id)
 
                     bs_obj = BasicRadcial(id=bs_id, tag=bs_tag, path="", position=bs_post, strokes_id=bs_strokes_id)
-                    print("bs_id: ", bs_id, " ", bs_strokes_id)
-
                     basic_radicals.append(bs_obj)
 
         # strokes
@@ -636,7 +626,6 @@ def load_stroke_library_dataset(path="../../../Data/Calligraphy_database/char_ge
         print("Stroke path is not existed!")
         return
     type_names = [f for f in os.listdir(path) if '.DS_Store' not in f]
-    print('type name num: ', len(type_names))
 
     dataset = {}
     count = 0
@@ -852,7 +841,7 @@ def query_target_strokes_by_postion_size(position, stroke_obj_list):
         print("Sorted condition is null!")
 
     sorted_condition_sorted = sorted(sorted_condition.items(), key=lambda x: x[1])
-    print(sorted_condition_sorted)
+
     for s in sorted_condition_sorted:
         if s[1] > THRESHOLD_CONDITION:
             break

@@ -13,8 +13,7 @@ from calligraphyJiZiByStrokeCompose.util import load_basic_radicals_library_data
     query_char_info_from_chars_list, query_similar_basic_radicals_and_strokes, render_generated_image, \
     create_grid_image_rgb, merge_gray_to_rgb_image
 
-from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage, \
-    creatBlankRGBImageWithSize, rgb2qimage
+from utils.Functions import createBlankGrayscaleImageWithSize, getSingleMaxBoundingBoxOfImage, rgb2qimage
 
 SIZE = 400
 
@@ -51,6 +50,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
     current_bs_id = 0
     current_bs_img_id = 0
+
     current_stroke_id = 0
     current_stroke_img_id = 0
 
@@ -291,8 +291,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             if ch_bs_obj is None:
                 continue
 
-            ch_strokes_id = ch_bs_obj.strokes_id  # here!!!!!!!!
-            print("char strokes id: ", ch_strokes_id)
+            ch_strokes_id = ch_bs_obj.strokes_id
 
             if len(similar_basic_radicals_dict_[k]) == 0:
                 continue
@@ -302,7 +301,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             bs_obj_path = bs_obj["path"]
             bs_obj_tag = bs_obj_path.split("/")[-1].split("_")[0]
             bs_obj_strokes_id = bs_obj["strokes_id"]
-            print("bs strokes id: ", bs_obj_strokes_id)
 
             bs_char_path_ = os.path.join(self.__char_root_path, bs_obj_tag, "strokes")
             bs_stroke_img_names_ = [f for f in os.listdir(bs_char_path_) if ".png" in f]
@@ -317,13 +315,11 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
                     if "_" + str(bs_obj_strokes_id[i]) + "." in bn:
                         self.__select_strokes_dict[int(ch_strokes_id[i])] = os.path.join(bs_char_path_, bn)
                         break
-        print(self.__select_strokes_dict)
 
         # get all default stroke
         for k in similar_strokes_dict_.keys():
             strokes_path_ = similar_strokes_dict_[k]
             self.__select_strokes_dict[int(k)] = strokes_path_[0]
-        print(self.__select_strokes_dict)
 
         # recompose default basic radicals and strokes
         image = createBlankGrayscaleImageWithSize((SIZE, SIZE))
@@ -332,7 +328,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         for key in self.__select_strokes_dict.keys():
 
             # get real position of stroke
-            print(current_char_obj_.strokes)
             real_post = current_char_obj_.strokes[int(key)].position
 
             cent_x0 = int(real_post[0] + real_post[2] / 2)
@@ -363,6 +358,9 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
 
         # render image display of generated results
         self.render_image_display(qimg_pix_, self.result_graphicsView, self.result_scene)
+
+        self.basic_radical_scene.clear()
+        self.stroke_scene.clear()
         del current_char_obj_, similar_basic_radicals_dict_, similar_strokes_dict_, image, stroke_img, \
             bk_with_grids_rgb_img
 
@@ -439,14 +437,12 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         select_bs_dict = self.similar_basic_radicals_dict[str(bs_id)][bs_img_id]
         select_bs_strokes_id = select_bs_dict["strokes_id"]
         select_bs_path = select_bs_dict["path"]
-        print("select strokes id: ", select_bs_strokes_id)
 
         # real char strokes id
         real_strokes_id = []
         for bs in self.current_char_obj.basic_radicals:
             if bs.id == str(bs_id):
                 real_strokes_id = bs.strokes_id
-        print("real strokes id: ", real_strokes_id)
 
         if len(select_bs_strokes_id) != len(real_strokes_id):
             print("select and real strokes id not same size!")
@@ -460,7 +456,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
             for sn in select_bs_strokes_name:
                 if "_" + str(select_bs_strokes_id[i]) + "." in sn:
                     self.__select_strokes_dict[real_strokes_id[i]] = os.path.join(self.__char_root_path, select_bs_char_tag, "strokes", sn)
-        print("selected strokes len: ", len(self.__select_strokes_dict))
 
         image = render_generated_image(self.current_char_obj, self.__select_strokes_dict, size=SIZE)
         self.current_char_gray = image.copy()
@@ -503,7 +498,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         # update the generated image
         stroke_id = self.target_strokes_treeView.currentIndex().parent().row()
         stroke_img_id = self.target_strokes_treeView.currentIndex().row()
-        print(stroke_id, " ", stroke_img_id)
 
         # click invaild content of stroke_id, not update image
         if stroke_id == -1:
@@ -514,7 +508,6 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         self.current_stroke_img_id = stroke_img_id
 
         stroke_img_name = self.target_strokes_treeView.currentIndex().data()
-        print(stroke_id, " ", stroke_img_name)
         stroke_type = stroke_img_name.split("_")[2]
         stroke_img_path = os.path.join(self.library_stroke_root_path, stroke_type, stroke_img_name)
         self.select_stroke_image_path = stroke_img_path
