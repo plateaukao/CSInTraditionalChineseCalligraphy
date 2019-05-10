@@ -168,6 +168,6 @@ def merge_pngs_to_pdf_file_by_range(page_num=20):
 
 
 if __name__ == '__main__':
-    create_pdf_files()
+    # create_pdf_files()
     # merge_pngs_to_pdf_file()
-    # merge_pngs_to_pdf_file_by_range()
+    merge_pngs_to_pdf_file_by_range()
