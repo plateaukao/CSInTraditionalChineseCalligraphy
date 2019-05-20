@@ -259,7 +259,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
         filename = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
 
         # convert bitmap to svg file
-        temp_path = './temp'
+        temp_path = './jianti_temp'
         if not os.path.exists(temp_path):
             os.makedirs(temp_path)
 
@@ -303,7 +303,7 @@ class CalligraphyJiZiByStrokeCompse(QMainWindow, Ui_MainWindow):
                     d = path_elems[i].getAttribute('d')
                     svg_content += '<path d="' + d + '"></path> \n'
 
-                # del temp files
+                # del jianti_temp files
                 os.system('rm {}'.format(png_img_path))
                 os.system('rm {}'.format(bmp_img_path))
                 os.system('rm {}'.format(svg_img_path))

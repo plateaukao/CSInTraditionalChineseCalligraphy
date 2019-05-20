@@ -1,9 +1,9 @@
 # coding: utf-8
 import os
 import xml.etree.ElementTree as ET
-from utils.Functions import getSingleMaxBoundingBoxOfImage, prettyXml
+from utils.Functions import prettyXml
 
-from pdf_generation_of_2300_9300_chars.convert_char_to_unicode_test import char_to_unicode_str
+from pdf_generation_of_2300_9300_chars.convert_char_to_unicode import char_to_unicode_str
 
 
 

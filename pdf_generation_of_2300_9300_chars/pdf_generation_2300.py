@@ -9,7 +9,7 @@ import numpy as np
 
 
 from utils.Functions import createBlankGrayscaleImageWithSize, creatBlankRGBImageWithSize, drawline
-from pdf_generation_of_2300_9300_chars.convert_char_to_unicode_test import chars_to_unicode_list
+from pdf_generation_of_2300_9300_chars.convert_char_to_unicode import chars_to_unicode_list
 
 
 chars_path = "2300chars.txt"

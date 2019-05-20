@@ -39,7 +39,7 @@ def generate_calligraphy_images():
     with open(all_chars_path, 'r') as f:
         all_chars = f.readlines()
         all_chars = [c.strip() for c in all_chars]
-    print('temp chars num: ', len(temp_chars), ' all chars num: ', len(all_chars))
+    print('jianti_temp chars num: ', len(temp_chars), ' all chars num: ', len(all_chars))
 
     # shuffle
     random.shuffle(all_chars)

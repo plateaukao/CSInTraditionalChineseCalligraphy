@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 
 from utils.Functions import getSingleMaxBoundingBoxOfImage, prettyXml
 
-from pdf_generation_of_2300_9300_chars.convert_char_to_unicode_test import chars_to_unicode_list
+from pdf_generation_of_2300_9300_chars.convert_char_to_unicode import chars_to_unicode_list
 
 
 def add_9300_chars_to_xml_dataset():

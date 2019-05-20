@@ -2,6 +2,8 @@
 import os
 import cv2
 import xml.etree.ElementTree as ET
+import shutil
+
 
 from utils.Functions import getSingleMaxBoundingBoxOfImage, prettyXml
 
@@ -10,9 +12,11 @@ char_1000_path = '../../../Data/Calligraphy_database/Chars_1000'
 
 char_merged = "../../../Data/Calligraphy_database/Chars_merged"
 
-xml_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order.xml"
+lp_processed = "../../../Data/Calligraphy_database/not_process_data_split/lp_processed"
 
-save_path = "../../../Data/Characters/radical_add_stroke_position_similar_structure_add_stroke_order_add_basic_radicals.xml"
+xml_path = "../../../Data/Characters/jian_fan_merge_basic_radical_stroke.xml"
+
+save_path = "../../../Data/Characters/jian_fan_merge_basic_radical_stroke_complement.xml"
 
 
 def add_basic_radical_info_to_xml(root, path):
@@ -28,6 +32,9 @@ def add_basic_radical_info_to_xml(root, path):
         if len(tag) > 1:
             continue
         if not tag in filenames:
+            continue
+
+        if element.findall("BASIC_RADICALS"):
             continue
 
         # add basic radicals element
@@ -80,6 +87,19 @@ def add_basic_radical_info_to_xml(root, path):
 
 
 
+def clean_png_in_radicals(path):
+
+    chars = [f for f in os.listdir(path) if "." not in f]
+
+    for ch in chars:
+        radical_path = os.path.join(path, ch, "basic radicals")
+        radical_img_names = [f for f in os.listdir(os.path.join(radical_path)) if ".png" in f]
+
+        for ri in radical_img_names:
+            if len(ri.split("_")) == 3:
+                os.remove(os.path.join(path, ch, "basic radicals", ri))
+
+
 
 
 
@@ -88,6 +108,9 @@ def add_basic_radical_info_to_xml(root, path):
 
 
 if __name__ == '__main__':
+
+    # clean extra image of radical
+    clean_png_in_radicals(lp_processed)
     # parse xml file
     tree = ET.parse(xml_path)
     if tree is None:
@@ -96,8 +119,10 @@ if __name__ == '__main__':
     root = tree.getroot()
     print("root len:", len(root))
 
-    root = add_basic_radical_info_to_xml(root, char_775_path)
-    root = add_basic_radical_info_to_xml(root, char_1000_path)
+    # root = add_basic_radical_info_to_xml(root, char_775_path)
+    # root = add_basic_radical_info_to_xml(root, char_1000_path)
+
+    root = add_basic_radical_info_to_xml(root, lp_processed)
 
     prettyXml(root, '\t', '\n')
     tree.write(save_path, encoding='utf-8')

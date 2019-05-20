@@ -85,7 +85,7 @@ def main():
     print("Shape similarity: %f" % shape_similarity)
     print("Same image similarity: %f" % simi)
 
-    cv2.imshow("temp", temp_reg)
+    cv2.imshow("jianti_temp", temp_reg)
     cv2.imshow("targ", targ_reg)
 
     cv2.waitKey(0)

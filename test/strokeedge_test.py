@@ -64,7 +64,7 @@ for i in range(1, 10):
     temp_img_path = os.path.join(temp_path, ("stroke_%d.png" % i))
     temp_img = cv2.imread(temp_img_path, 0)
     temp_strokes.append(temp_img)
-print("temp stroke num: ", len(temp_strokes))
+print("jianti_temp stroke num: ", len(temp_strokes))
 
 # template char image
 temp_char_img = cv2.imread(temp_char_path, 0)
@@ -86,11 +86,11 @@ src_img_box = src_img[src_miny: src_miny + src_minh, src_minx: src_minx + src_mi
 print(temp_img_box.shape)
 print(src_img_box.shape)
 
-# create square of temp and src image
+# create square of jianti_temp and src image
 temp_square = np.array(np.ones((temp_box_width, temp_box_width)) * 255, dtype=np.uint8)
 src_square = np.array(np.ones((src_box_width, src_box_width)) * 255, dtype=np.uint8)
 
-# paste temp and src image to square image
+# paste jianti_temp and src image to square image
 if temp_minw > temp_minh:
     temp_square[int((temp_minw-temp_minh)/2): int((temp_minw-temp_minh)/2)+temp_minh, 0:temp_minw] = temp_img_box
 elif temp_minw < temp_minh:
@@ -167,7 +167,7 @@ for i in range(len(src_components)):
 
         if is_same_components(src, temp):
             temp_src_comp_relations.append((i, j))
-print("temp src compoents relation: ", temp_src_comp_relations)
+print("jianti_temp src compoents relation: ", temp_src_comp_relations)
 
 # infer src components strokes relations
 src_comp_contains_strokes = []
@@ -197,9 +197,9 @@ print("basic strokes num: ", len(basic_strokes))
 
 
 cv2.imshow("src", src_img)
-cv2.imshow("temp char", temp_char_img)
+cv2.imshow("jianti_temp char", temp_char_img)
 #
-# cv2.imshow("temp square", temp_square)
+# cv2.imshow("jianti_temp square", temp_square)
 # cv2.imshow("src square", src_square)
 
 # for i in range(len(temp_strokes_resized)):

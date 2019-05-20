@@ -986,9 +986,9 @@ def removeBreakPointsOfContour(contour):
 #
 #     while (not done):
 #         eroded = cv2.erode(image, element)
-#         temp = cv2.dilate(eroded, element)
-#         temp = cv2.subtract(image, temp)
-#         skel = cv2.bitwise_or(skel, temp)
+#         jianti_temp = cv2.dilate(eroded, element)
+#         jianti_temp = cv2.subtract(image, jianti_temp)
+#         skel = cv2.bitwise_or(skel, jianti_temp)
 #         image = eroded.copy()
 #
 #         zeros = size - cv2.countNonZero(image)

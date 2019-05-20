@@ -827,7 +827,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
             combine_fore_img = addBackgroundImage(combine_fore_img, back_img)
 
-            # temp
+            # jianti_temp
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             combine_qimg = rgb2qimage(combine_fore_img)
@@ -863,7 +863,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
 
-            # temp and targ
+            # jianti_temp and targ
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
 
@@ -899,7 +899,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, temp_back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, targ_back_img)
 
-            # temp and targ qimg
+            # jianti_temp and targ qimg
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             temp_pix = QPixmap.fromImage(temp_qimg)
@@ -976,7 +976,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
             combine_fore_img = addBackgroundImage(combine_fore_img, back_img)
 
-            # temp
+            # jianti_temp
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             combine_qimg = rgb2qimage(combine_fore_img)
@@ -1012,7 +1012,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
 
-            # temp and targ
+            # jianti_temp and targ
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
 
@@ -1048,7 +1048,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, temp_back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, targ_back_img)
 
-            # temp and targ qimg
+            # jianti_temp and targ qimg
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             temp_pix = QPixmap.fromImage(temp_qimg)
@@ -1125,7 +1125,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
             combine_fore_img = addBackgroundImage(combine_fore_img, back_img)
 
-            # temp
+            # jianti_temp
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             combine_qimg = rgb2qimage(combine_fore_img)
@@ -1161,7 +1161,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, back_img)
 
-            # temp and targ
+            # jianti_temp and targ
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
 
@@ -1197,7 +1197,7 @@ class CalligraphyComparisonGUI(QMainWindow, Ui_MainWindow):
             temp_fore_img = addBackgroundImage(temp_fore_img, temp_back_img)
             targ_fore_img = addBackgroundImage(targ_fore_img, targ_back_img)
 
-            # temp and targ qimg
+            # jianti_temp and targ qimg
             temp_qimg = rgb2qimage(temp_fore_img)
             targ_qimg = rgb2qimage(targ_fore_img)
             temp_pix = QPixmap.fromImage(temp_qimg)

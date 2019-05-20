@@ -3,6 +3,7 @@ import json
 import os
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
+from utils.Functions import prettyXml
 
 
 def extract_stroke_from_graphics_file(path, save_path):

@@ -4,7 +4,7 @@ import cv2
 from utils.Functions import createBlankGrayscaleImageWithSize
 from calligraphyJiZiByStrokeCompose.util import create_grid_image_rgb
 
-# path= "./temp"
+# path= "./jianti_temp"
 #
 # stroke_imgs = [f for f in os.listdir(path) if "stroke" in f and ".png" in f]
 #

@@ -22,7 +22,7 @@ if __name__ == '__main__':
     # _, temp_img = cv2.threshold(temp_img, 127, 255, cv2.THRESH_BINARY)
 
     cv2.imshow("src", src_img)
-    # cv2.imshow("temp", temp_img)
+    # cv2.imshow("jianti_temp", temp_img)
 
     # bounding box
     src_x, src_y, src_w, src_h = getSingleMaxBoundingBoxOfImage(src_img)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     # src_part1 = src_window[455:455+temp_h, 165:165+temp_w]
     #
     # cv2.imshow("src part", src_part)
-    # cv2.imshow("temp", temp_window)
+    # cv2.imshow("jianti_temp", temp_window)
     # cv2.imshow("src 2", src_part1)
     #
     # cr = calculateCR(src_part, temp_window)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         src_window_rgb = cv2.rectangle(src_window_rgb, (loc_x, loc_y), (loc_x+temp_w, loc_y+temp_h), (0,255,0), 1)
 
     cv2.imshow("src window", src_window)
-    cv2.imshow("temp window", temp_window)
+    cv2.imshow("jianti_temp window", temp_window)
     cv2.imshow("src window rgb", src_window_rgb)
 
     cv2.waitKey(0)

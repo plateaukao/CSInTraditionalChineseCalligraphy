@@ -332,7 +332,7 @@ def recompose_chars(chars_info_list, similar_chars,
                     break
 
             if real_post == None:
-                print("Not find temp position!")
+                print("Not find jianti_temp position!")
                 continue
 
             cent_x0 = int(real_post[0] + real_post[2] / 2)
