@@ -1,0 +1,83 @@
+<RADICALS>
+	<RADICAL ID="4E00" TAG="一">
+		<TYPE>character</TYPE>
+		<STRUCTURE>Single Character</STRUCTURE>
+		<KEY_RADICAL>一</KEY_RADICAL>
+		<STROKE_COUNT>1</STROKE_COUNT>
+		<STROKE_ORDER>横</STROKE_ORDER>
+		<BASIC_RADICALS>
+			<BASIC_RADICAL ID="0" TAG="一">
+				<STROKES>
+					<STROKE ID="0" />
+				</STROKES>
+				<SIMILAR_TAG>['丁', '七', '万', '三', '上', '下', '丌', '不', '与', '丐']</SIMILAR_TAG>
+			</BASIC_RADICAL>
+		</BASIC_RADICALS>
+	</RADICAL>
+	<RADICAL ID="4E01" TAG="丁">
+		<TYPE>character</TYPE>
+		<STRUCTURE>Single Character</STRUCTURE>
+		<KEY_RADICAL>一</KEY_RADICAL>
+		<STROKE_COUNT>2</STROKE_COUNT>
+		<STROKE_ORDER>横|竖钩</STROKE_ORDER>
+		<BASIC_RADICALS>
+			<BASIC_RADICAL ID="0" TAG="丁">
+				<STROKES>
+					<STROKE ID="0" />
+					<STROKE ID="1" />
+				</STROKES>
+				<SIMILAR_TAG>['丁', '七', '万', '三', '上', '下', '丌', '不', '与', '丐']</SIMILAR_TAG>
+			</BASIC_RADICAL>
+		</BASIC_RADICALS>
+	</RADICAL>
+	<RADICAL ID="4E03" TAG="七">
+		<TYPE>character</TYPE>
+		<STRUCTURE>Single Character</STRUCTURE>
+		<KEY_RADICAL>一</KEY_RADICAL>
+		<STROKE_COUNT>2</STROKE_COUNT>
+		<STROKE_ORDER>横|竖弯钩</STROKE_ORDER>
+		<BASIC_RADICALS>
+			<BASIC_RADICAL ID="0" TAG="七">
+				<STROKES>
+					<STROKE ID="0" />
+					<STROKE ID="1" />
+				</STROKES>
+				<SIMILAR_TAG>['丁', '七', '万', '三', '上', '下', '丌', '不', '与', '丐']</SIMILAR_TAG>
+			</BASIC_RADICAL>
+		</BASIC_RADICALS>
+	</RADICAL>
+	<RADICAL ID="4E07" TAG="万">
+		<TYPE>character</TYPE>
+		<STRUCTURE>character</STRUCTURE>
+		<KEY_RADICAL>一</KEY_RADICAL>
+		<STROKE_COUNT>3</STROKE_COUNT>
+		<STROKE_ORDER>横, 横折钩, 撇</STROKE_ORDER>
+		<BASIC_RADICALS>
+			<BASIC_RADICAL ID="0" TAG="万">
+				<STROKES>
+					<STROKE ID="0" />
+					<STROKE ID="1" />
+					<STROKE ID="2" />
+				</STROKES>
+				<SIMILAR_TAG>丁, 七, 万, 三, 上, 下, 丌, 不, 与, 丐</SIMILAR_TAG>
+			</BASIC_RADICAL>
+		</BASIC_RADICALS>
+	</RADICAL>
+	<RADICAL ID="4E08" TAG="丈">
+		<TYPE>character</TYPE>
+		<STRUCTURE>Single Character</STRUCTURE>
+		<KEY_RADICAL>一</KEY_RADICAL>
+		<STROKE_COUNT>3</STROKE_COUNT>
+		<STROKE_ORDER>横|撇|捺</STROKE_ORDER>
+		<BASIC_RADICALS>
+			<BASIC_RADICAL ID="0" TAG="丈">
+				<STROKES>
+					<STROKE ID="0" />
+					<STROKE ID="1" />
+					<STROKE ID="2" />
+				</STROKES>
+				<SIMILAR_TAG>['丁', '七', '万', '三', '上', '下', '丌', '不', '与', '丐']</SIMILAR_TAG>
+			</BASIC_RADICAL>
+		</BASIC_RADICALS>
+	</RADICAL>
+</RADICALS>
