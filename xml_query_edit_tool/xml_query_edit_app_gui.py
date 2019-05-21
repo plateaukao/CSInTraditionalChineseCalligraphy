@@ -383,10 +383,6 @@ class XMLQueryAndEditAppGUI(QMainWindow, Ui_MainWindow):
                 bs_0_similar_tags_elems[0].text = bs_0_similar_tags
 
 
-
-
-
-
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     MainWindow = XMLQueryAndEditAppGUI()
