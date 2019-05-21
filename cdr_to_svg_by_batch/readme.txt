@@ -41,4 +41,14 @@ sK1 2.0 is professional quality illustration program for Windows, GNU/Linux and 
 
 
 
+https://listoffreeware.com/best-free-mac-cdr-viewer-software/
+
+4 Best Free MAC CDR Viewer Software
+
+
+
+====== last use inkspace
+
+
+/Applications/Inkscape.app/Contents/Resources/bin/inkscape-bin -z -D --file=test.cdr --export-plain-svg=test.svg --export-latex
 

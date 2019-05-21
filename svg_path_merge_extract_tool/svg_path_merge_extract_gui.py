@@ -1,23 +1,12 @@
 # coding: utf-8
-import sys
-import math
-import cv2
-import os
-import numpy as np
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import *
 import copy
 import os
-import copy
-from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPM
-from xml.dom import minidom
 import shutil
+import sys
+from xml.dom import minidom
 
-import xml.etree.ElementTree as ET
-
-from utils.Functions import prettyXml
+from PyQt5.QtCore import *
+from PyQt5.QtWidgets import *
 
 from svg_path_merge_extract_tool.svg_path_merge_extract_mainwindow import Ui_MainWindow
 

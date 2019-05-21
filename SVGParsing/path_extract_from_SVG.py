@@ -1,8 +1,5 @@
 # coding: utf-8
-import os
 import copy
-from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPM
 from xml.dom import minidom
 
 

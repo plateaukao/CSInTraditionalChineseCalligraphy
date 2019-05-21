@@ -1,19 +1,11 @@
 # coding: utf-8
-import sys
-import math
-import cv2
 import os
-import numpy as np
+import sys
+
+import cv2
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-import copy
-import os
-import copy
-from svglib.svglib import svg2rlg
-from reportlab.graphics import renderPM
-from xml.dom import minidom
-import shutil
 
 from single_char_radical_select_tool.single_char_radical_select_mainwindow import Ui_MainWindow
 from utils.graphic_scene import GraphicsScene
