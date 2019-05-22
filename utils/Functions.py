@@ -9,6 +9,30 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 
+def get_3_point_water_radical_img(img_obj, threshold=1.0 / 3.5):
+    if img_obj is None:
+        print("img obj is none")
+        return
+
+    bk = createBlankGrayscaleImageWithSize(img_obj.shape)
+    # get all connected radicals
+    all_connected_radicals = getConnectedComponentsOfGrayScale(img_obj)
+    for rad in all_connected_radicals:
+        rect = getSingleMaxBoundingBoxOfImage(rad)
+        if rect[2] <= 10 and rect[3] <= 10:
+            continue
+        if rect[2] > img_obj.shape[0] * 0.9 and rect[3] > img_obj.shape[1] * 0.9:
+            continue
+
+        cent_x = rect[0] + int(rect[2] / 2)
+        if cent_x <= threshold * img_obj.shape[1]:
+            for x in range(rad.shape[0]):
+                for y in range(rad.shape[1]):
+                    if rad[x][y] == 0:
+                        bk[x][y] = 0
+    return bk
+
+
 def drawline(img,pt1,pt2,color,thickness=1,style='dotted',gap=10):
     dist =((pt1[0]-pt2[0])**2+(pt1[1]-pt2[1])**2)**.5
     pts= []

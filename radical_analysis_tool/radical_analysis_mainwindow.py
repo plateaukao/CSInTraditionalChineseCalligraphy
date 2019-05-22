@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'radical_analysis_mainwindow.ui'
+#
+# Created by: PyQt5 UI code generator 5.9.2
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt5 import QtCore, QtGui, QtWidgets
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(1193, 797)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.open_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.open_pushButton.setGeometry(QtCore.QRect(20, 10, 114, 32))
+        self.open_pushButton.setObjectName("open_pushButton")
+        self.scrollArea = QtWidgets.QScrollArea(self.centralwidget)
+        self.scrollArea.setGeometry(QtCore.QRect(30, 60, 151, 611))
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setObjectName("scrollArea")
+        self.scrollAreaWidgetContents = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 149, 609))
+        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.a_listWidget = QtWidgets.QListWidget(self.scrollAreaWidgetContents)
+        self.a_listWidget.setGeometry(QtCore.QRect(0, 0, 151, 611))
+        self.a_listWidget.setObjectName("a_listWidget")
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scrollArea_2 = QtWidgets.QScrollArea(self.centralwidget)
+        self.scrollArea_2.setGeometry(QtCore.QRect(190, 60, 151, 611))
+        self.scrollArea_2.setWidgetResizable(True)
+        self.scrollArea_2.setObjectName("scrollArea_2")
+        self.scrollAreaWidgetContents_2 = QtWidgets.QWidget()
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 149, 609))
+        self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
+        self.b_listWidget = QtWidgets.QListWidget(self.scrollAreaWidgetContents_2)
+        self.b_listWidget.setGeometry(QtCore.QRect(0, 0, 151, 611))
+        self.b_listWidget.setObjectName("b_listWidget")
+        self.scrollArea_2.setWidget(self.scrollAreaWidgetContents_2)
+        self.merged_graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
+        self.merged_graphicsView.setGeometry(QtCore.QRect(370, 60, 500, 500))
+        self.merged_graphicsView.setObjectName("merged_graphicsView")
+        self.a_graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
+        self.a_graphicsView.setGeometry(QtCore.QRect(890, 60, 250, 250))
+        self.a_graphicsView.setObjectName("a_graphicsView")
+        self.b_graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
+        self.b_graphicsView.setGeometry(QtCore.QRect(890, 330, 250, 250))
+        self.b_graphicsView.setObjectName("b_graphicsView")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(90, 680, 59, 16))
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.centralwidget)
+        self.label_2.setGeometry(QtCore.QRect(1160, 150, 59, 16))
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.centralwidget)
+        self.label_3.setGeometry(QtCore.QRect(240, 680, 59, 16))
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.centralwidget)
+        self.label_4.setGeometry(QtCore.QRect(1160, 430, 59, 16))
+        self.label_4.setObjectName("label_4")
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(580, 570, 101, 16))
+        self.label_5.setObjectName("label_5")
+        self.analyze_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.analyze_pushButton.setGeometry(QtCore.QRect(370, 600, 114, 32))
+        self.analyze_pushButton.setObjectName("analyze_pushButton")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1193, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.open_pushButton.setText(_translate("MainWindow", "Open"))
+        self.label.setText(_translate("MainWindow", "A"))
+        self.label_2.setText(_translate("MainWindow", "A"))
+        self.label_3.setText(_translate("MainWindow", "B"))
+        self.label_4.setText(_translate("MainWindow", "B"))
+        self.label_5.setText(_translate("MainWindow", "Merged result"))
+        self.analyze_pushButton.setText(_translate("MainWindow", "Analyze"))
+
