@@ -103,12 +103,11 @@ class CharacterSynthesisGUI(QMainWindow, Ui_MainWindow):
 
         print("template generation successed!")
 
-
-
-
-
     def handle_synthesis_button(self):
         print("synthesis button clicked")
+
+        # clean cache
+        self.generated_results_listWidget.clear()
 
         self.input_chars = self.input_plainTextEdit.toPlainText().strip()
         print(self.input_chars)
@@ -137,12 +136,6 @@ class CharacterSynthesisGUI(QMainWindow, Ui_MainWindow):
 
         self.grayscale_scene.addPixmap(qimg_pix)
         self.grayscale_scene.update()
-
-
-
-
-
-
 
 if __name__ == '__main__':
     if __name__ == '__main__':

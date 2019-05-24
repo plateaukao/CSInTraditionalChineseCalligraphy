@@ -6,8 +6,8 @@ import xml.etree.ElementTree as ET
 from utils.Functions import getSingleMaxBoundingBoxOfImage, prettyXml
 
 
-xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids.xml"
-save_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position.xml"
+xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position_add_stroke_order_recorrect.xml"
+save_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position_add_stroke_order_recorrect_add_true_post.xml"
 
 strokes_png_path = "../../../Data/Calligraphy_database/Stroke_pngs"
 
@@ -54,8 +54,10 @@ def add_bs_stroke_position_to_xml():
             bs_elems = basic_radicals_root_elems[0].findall("BASIC_RADICAL")
             if bs_elems:
                 for bs_item in bs_elems:
-                    min_x = min_y = 1000000000
+                    min_x1 = min_y1 = 1000000000
                     max_w = max_h = -1
+
+                    max_x2 = max_y2 = -1
 
                     sk_root_elems = bs_item.findall("STROKES")
                     if sk_root_elems:
@@ -75,12 +77,13 @@ def add_bs_stroke_position_to_xml():
 
                             sk_item.set("POSITION", str(rect))
 
-                            min_x = min(min_x, rect[0])
-                            min_y = min(min_y, rect[1])
-                            max_w = max(max_w, rect[2])
-                            max_h = max(max_h, rect[3])
+                            min_x1 = min(min_x1, rect[0])
+                            min_y1 = min(min_y1, rect[1])
 
-                    bs_item.set("POSITION", str((min_x, min_y, max_w, max_h)))
+                            max_x2 = max(max_x2, rect[0] + rect[2])
+                            max_y2 = max(max_y2, rect[1] + rect[3])
+
+                    bs_item.set("POSITION", str((min_x1, min_y1, max_x2-min_x1, max_y2-min_y1)))
 
     # pretty xml
     prettyXml(root, '\t', '\n')
