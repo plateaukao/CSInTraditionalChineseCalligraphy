@@ -4,8 +4,11 @@ import xml.etree.ElementTree as ET
 from utils.Functions import prettyXml
 
 
+# xml_path = "../../../Data/Calligraphy_database/XML_dataset/test.xml"
+# save_path = "../../../Data/Calligraphy_database/XML_dataset/test_add_ids.xml"
+
 xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_no_position.xml"
-save_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_position.xml"
+save_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids.xml"
 
 def add_stroke_ids_to_bs():
     tree = ET.parse(xml_path)
@@ -44,6 +47,7 @@ def add_stroke_ids_to_bs():
                     bs_sk_count = get_stroke_count(root, bs_tag)
                     bs_sk_count_dict[bs_id] = bs_sk_count
 
+        print(bs_sk_count_dict)
         # check bs sk count == sk_count
 
         bs_sk_count_total = 0
@@ -58,39 +62,34 @@ def add_stroke_ids_to_bs():
                 for key in bs_sk_count_dict.keys():
                     if bs_sk_count_dict[key] == 0:
                         bs_sk_count_dict[key] = d_value
-
+        print(bs_sk_count_dict)
         # add sk ids to basic radicals
         used_ids = 0
         bs_root_elems = radical_elem.findall("BASIC_RADICALS")
         if bs_root_elems:
             bs_elems = bs_root_elems[0].findall("BASIC_RADICAL")
             if bs_elems:
-                for bs_item in bs_elems:
-                    bs_id = bs_item.attrib["ID"].strip()
 
-                    if bs_id not in bs_sk_count_dict:
-                        continue
+                for bs_id_ in range(len(bs_elems)):
 
-                    bs_sk_count = bs_sk_count_dict[bs_id]
+                    for bs_item in bs_elems:
+                        bs_id = bs_item.attrib["ID"].strip()
 
-                    bs_sk_root_elem = ET.SubElement(bs_item, "STROKES")
+                        if bs_id == str(bs_id_):
+                            bs_sk_count = bs_sk_count_dict[bs_id]
 
-                    for bs_sk_id in range(bs_sk_count):
-                        sk_id_ = used_ids + bs_sk_id
-                        bs_sk_elem = ET.SubElement(bs_sk_root_elem, "STROKE")
-                        bs_sk_elem.set("ID", str(sk_id_))
+                            bs_sk_root_elem = ET.SubElement(bs_item, "STROKES")
 
-                    used_ids += bs_sk_count
+                            for bs_sk_id in range(bs_sk_count):
+                                sk_id_ = used_ids + bs_sk_id
+                                bs_sk_elem = ET.SubElement(bs_sk_root_elem, "STROKE")
+                                bs_sk_elem.set("ID", str(sk_id_))
+
+                            used_ids += bs_sk_count
 
     # pretty xml
     prettyXml(root, '\t', '\n')
     tree.write(save_path, encoding='utf-8')
-
-
-
-
-
-
 
 
 def get_stroke_count(root, ch):

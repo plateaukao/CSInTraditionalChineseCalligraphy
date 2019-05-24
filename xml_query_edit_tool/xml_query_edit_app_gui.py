@@ -259,6 +259,7 @@ class XMLQueryAndEditAppGUI(QMainWindow, Ui_MainWindow):
             bs_elems = basic_radicals_root_elems[0].findall("BASIC_RADICAL")
             if bs_elems:
                 bs_dict = {}
+
                 for bs_id in range(len(bs_elems)):
                     bs_item = bs_elems[bs_id]
                     bs_id = bs_item.attrib["ID"].strip()
@@ -285,11 +286,12 @@ class XMLQueryAndEditAppGUI(QMainWindow, Ui_MainWindow):
 
                     bs_obj = BasicRadical()
                     bs_obj.id = bs_id
+                    print(bs_id)
                     bs_obj.tag = bs_tag
                     bs_obj.strokes = bs_strokes.copy()
                     bs_obj.similar_tags = bs_similar_tags
 
-                basic_radicals_obj_list.append(copy.deepcopy(bs_obj))
+                    basic_radicals_obj_list.append(copy.deepcopy(bs_obj))
 
         print("bs len: {}".format(len(basic_radicals_obj_list)))
 

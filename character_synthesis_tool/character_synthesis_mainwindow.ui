@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1566</width>
-    <height>765</height>
+    <width>1215</width>
+    <height>808</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -194,7 +194,7 @@
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>390</x>
       <y>20</y>
       <width>131</width>
       <height>16</height>
@@ -204,45 +204,17 @@
      <string>Generated Results:</string>
     </property>
    </widget>
-   <widget class="QWebEngineView" name="svg_webEngineView">
-    <property name="geometry">
-     <rect>
-      <x>620</x>
-      <y>390</y>
-      <width>300</width>
-      <height>300</height>
-     </rect>
-    </property>
-    <property name="url">
-     <url>
-      <string>about:blank</string>
-     </url>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_4">
     <property name="geometry">
      <rect>
-      <x>740</x>
+      <x>800</x>
       <y>30</y>
-      <width>59</width>
+      <width>131</width>
       <height>16</height>
      </rect>
     </property>
     <property name="text">
-     <string>Grayscale</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>750</x>
-      <y>370</y>
-      <width>59</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>SVG</string>
+     <string>Generated image</string>
     </property>
    </widget>
    <widget class="QPushButton" name="use_last_chars_pushButton">
@@ -263,48 +235,10 @@
      <rect>
       <x>620</x>
       <y>50</y>
-      <width>300</width>
-      <height>300</height>
+      <width>500</width>
+      <height>500</height>
      </rect>
     </property>
-   </widget>
-   <widget class="QScrollArea" name="scrollArea_4">
-    <property name="geometry">
-     <rect>
-      <x>940</x>
-      <y>50</y>
-      <width>611</width>
-      <height>641</height>
-     </rect>
-    </property>
-    <property name="widgetResizable">
-     <bool>true</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents_4">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>609</width>
-       <height>639</height>
-      </rect>
-     </property>
-     <widget class="QWebEngineView" name="xml_webEngineView">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>611</width>
-        <height>641</height>
-       </rect>
-      </property>
-      <property name="url">
-       <url>
-        <string>about:blank</string>
-       </url>
-      </property>
-     </widget>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -312,20 +246,13 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1566</width>
+     <width>1215</width>
      <height>22</height>
     </rect>
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QWebEngineView</class>
-   <extends>QWidget</extends>
-   <header location="global">QtWebEngineWidgets/QWebEngineView</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

@@ -1,6 +1,7 @@
 # coding: utf-8
 import json
 import os
+import cv2
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPM
 from utils.Functions import prettyXml
@@ -40,11 +41,16 @@ def extract_stroke_from_graphics_file(path, save_path):
             if drawing is None:
                 print("drawing is None!")
             renderPM.drawToFile(drawing, os.path.join(save_path, (tag + "_" + code + "_" + str(j) + ".png")), "png")
+            img = cv2.imread(os.path.join(save_path, (tag + "_" + code + "_" + str(j) + ".png")), 0)
+            img = cv2.resize(img, (256, 256))
+            cv2.imwrite(os.path.join(save_path, (tag + "_" + code + "_" + str(j) + ".png")))
+
+            os.remove(os.path.join(save_path, (tag + "_" + code + "_" + str(j) + ".svg")))
 
         print(tag, ": ", len(strokes))
 
 
 if __name__ == '__main__':
     path = "../../Data/graphics.txt"
-    save_path = "../../Data/svgs_stroke"
+    save_path = "../../../Data/Calligraphy_database/Stroke_pngs"
     extract_stroke_from_graphics_file(path, save_path)
