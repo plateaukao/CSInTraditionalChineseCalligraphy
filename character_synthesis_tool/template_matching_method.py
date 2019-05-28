@@ -20,20 +20,37 @@ def find_similar_basic_radicals_img_names_with_same_position_and_size(post, bs_t
     print("temp bs image num: ", len(temp_bs_names))
 
     similar_bs_names = []
-
     print("post: ", post)
 
-    min_x = min_y = min_w = min_h = 100000000
+    cent_x0 = int(post[0] + post[2] / 2)
+    cent_y0 = int(post[1] + post[3] / 2)
+
+    similar_image_ssim_dict = {}
     for t_name in temp_bs_names:
         t_img_path = os.path.join(bs_type_path, t_name)
         t_img = cv2.imread(t_img_path, 0)
+        _, t_img = cv2.threshold(t_img, 127, 255, cv2.THRESH_BINARY)
         x, y, w, h = getSingleMaxBoundingBoxOfImage(t_img)
-        print(t_name, x, y, w, h)
 
-        # rule1
-        if abs(x - post[0]) <= threshold and abs(y - post[1]) <= threshold and abs(w - post[2]) \
-                <= threshold and abs(h - post[3]) <= threshold:
-            similar_bs_names.append(t_name)
+        cent_x = int(x + w / 2)
+        cent_y = int(y + h / 2)
+
+        loc_ssim = abs(cent_x0 - cent_x) + abs(cent_y0 - cent_y)
+        size_ssim = abs(w - post[2]) + abs(h - post[3])
+
+        total_ssim = 0.5 * loc_ssim + 0.5 * size_ssim
+
+        if total_ssim <= threshold:
+            similar_image_ssim_dict[t_name] = total_ssim
+
+
+    # sorted find images based on the total ssim
+    if len(similar_image_ssim_dict) > 0:
+        dict_sorted_list = [(k, similar_image_ssim_dict[k]) for k in sorted(similar_image_ssim_dict,\
+                            key=similar_image_ssim_dict.get)]
+
+        for k, _ in dict_sorted_list:
+            similar_bs_names.append(k)
 
     return similar_bs_names
 
@@ -54,14 +71,23 @@ def find_similar_basic_radicals_img_names_with_same_size(post, bs_type_path, thr
 
     similar_bs_names = []
 
+    similar_image_ssim_dict = {}
     for t_name in temp_bs_names:
         t_img_path = os.path.join(bs_type_path, t_name)
         t_img = cv2.imread(t_img_path, 0)
+        _, t_img = cv2.threshold(t_img, 127, 255, cv2.THRESH_BINARY)
         x, y, w, h = getSingleMaxBoundingBoxOfImage(t_img)
 
-        # rule1
-        if abs(w - post[2]) <= threshold and abs(h - post[3]) <= threshold:
-            similar_bs_names.append(t_name)
+        size_ssim = abs(w - post[2]) + abs(h - post[3])
+        if size_ssim <= threshold:
+            similar_image_ssim_dict[t_name] = size_ssim
+
+    # sorted
+    if len(similar_image_ssim_dict) > 0:
+        dict_sorted_list = [(k, similar_image_ssim_dict[k]) for k in sorted(similar_image_ssim_dict, \
+                                                                            key=similar_image_ssim_dict.get)]
+        for k, _ in dict_sorted_list:
+            similar_bs_names.append(k)
 
     return similar_bs_names
 
@@ -74,15 +100,35 @@ def find_similar_strokes_img_names_with_same_position_and_size(post, stroke_type
     print("temp sk image num:", len(temp_sk_names))
 
     similar_sk_names = []
+
+    cent_x0 = int(post[0] + post[2] / 2)
+    cent_y0 = int(post[1] + post[3] / 2)
+
+    similar_image_ssim_dict = {}
     for t_name in temp_sk_names:
         t_img_path = os.path.join(stroke_type_path, t_name)
         t_img = cv2.imread(t_img_path, 0)
+        _, t_img = cv2.threshold(t_img, 127, 255, cv2.THRESH_BINARY)
         x, y, w, h = getSingleMaxBoundingBoxOfImage(t_img)
 
-        # rule1
-        if abs(x - post[0]) <= threshold and abs(y - post[1]) <= threshold and abs(w - post[2]) \
-                <= threshold and abs(h - post[3]) <= threshold:
-            similar_sk_names.append(t_name)
+        cent_x = int(x + w / 2)
+        cent_y = int(y + h / 2)
+
+        loc_ssim = abs(cent_x0 - cent_x) + abs(cent_y0 - cent_y)
+        size_ssim = abs(w - post[2]) + abs(h - post[3])
+
+        total_ssim = 0.5 * loc_ssim + 0.5 * size_ssim
+
+        if total_ssim <= threshold:
+            similar_image_ssim_dict[t_name] = total_ssim
+
+    # sorted find images based on the total ssim
+    if len(similar_image_ssim_dict) > 0:
+        dict_sorted_list = [(k, similar_image_ssim_dict[k]) for k in sorted(similar_image_ssim_dict, \
+                                                                                    key=similar_image_ssim_dict.get)]
+
+        for k, _ in dict_sorted_list:
+            similar_sk_names.append(k)
 
     return similar_sk_names
 
@@ -95,14 +141,25 @@ def find_similar_strokes_img_names_with_same_size(post, stroke_type_path, thresh
     print("temp sk image num:", len(temp_sk_names))
 
     similar_sk_names = []
+
+    similar_image_ssim_dict = {}
     for t_name in temp_sk_names:
         t_img_path = os.path.join(stroke_type_path, t_name)
         t_img = cv2.imread(t_img_path, 0)
+        _, t_img = cv2.threshold(t_img, 127, 255, cv2.THRESH_BINARY)
         x, y, w, h = getSingleMaxBoundingBoxOfImage(t_img)
 
-        # rule1
-        if abs(w - post[2]) <= threshold and abs(h - post[3]) <= threshold:
-            similar_sk_names.append(t_name)
+        size_ssim = abs(w - post[2]) + abs(h - post[3])
+        if size_ssim <= threshold:
+            similar_image_ssim_dict[t_name] = size_ssim
+
+    # sorted
+    if len(similar_image_ssim_dict) > 0:
+        dict_sorted_list = [(k, similar_image_ssim_dict[k]) for k in sorted(similar_image_ssim_dict, \
+                                                                key=similar_image_ssim_dict.get)]
+
+        for k, _ in dict_sorted_list:
+            similar_sk_names.append(k)
 
     # if not find same size stroke, return the most similar one stroke
     if len(similar_sk_names) == 0:

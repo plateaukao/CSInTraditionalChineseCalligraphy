@@ -44,8 +44,8 @@ def add_stroke_order_to_XML():
     for s in img_names_diff:
         shutil.copy2(os.path.join(all_imgs_path, s), img_diff_path)
 
-    xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position.xml"
-    save_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position_add_stroke_order.xml"
+    xml_path = "../../../Data/Calligraphy_database/XML_dataset/correct_sk_orders.xml"
+    save_path = "../../../Data/Calligraphy_database/XML_dataset/correct_sk_orders_add_orders.xml"
 
     tree = ET.parse(xml_path)
     if tree is None:
@@ -64,7 +64,7 @@ def add_stroke_order_to_XML():
         # find all images
         imgs = []
         for s in type_img_names:
-            if tag + '_' in s:
+            if tag + '_' in s and len(s.split("_")) == 4:
                 imgs.append(s)
         # sort images
         max_num = 0

@@ -7,8 +7,8 @@ from utils.Functions import prettyXml
 # xml_path = "../../../Data/Calligraphy_database/XML_dataset/test.xml"
 # save_path = "../../../Data/Calligraphy_database/XML_dataset/test_add_ids.xml"
 
-xml_path = "../../../Data/Calligraphy_database/XML_dataset/full_pure_dataset.xml"
-save_path = "../../../Data/Calligraphy_database/XML_dataset/full_pure_dataset_add_sk_ids.xml"
+xml_path = "./img_merge_test/add_bs_sk_position_test.xml"
+save_path = "./img_merge_test/add_bs_sk_position_test_result_add_sk_ids.xml"
 
 def add_stroke_ids_to_bs():
     tree = ET.parse(xml_path)
@@ -28,6 +28,7 @@ def add_stroke_ids_to_bs():
         sk_count_elems = radical_elem.findall("STROKE_COUNT")
         if sk_count_elems and sk_count_elems[0].text is not None:
             sk_count = int(sk_count_elems[0].text)
+            print("stroke count: ", sk_count)
         else:
             print("{} has no stroke count!".format(tag))
             continue
@@ -46,6 +47,8 @@ def add_stroke_ids_to_bs():
                         continue
                     bs_sk_count = get_stroke_count(root, bs_tag)
                     bs_sk_count_dict[bs_id] = bs_sk_count
+
+                    print("{} sk count: {}".format(bs_tag, bs_sk_count))
 
         print(bs_sk_count_dict)
         # check bs sk count == sk_count

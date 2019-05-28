@@ -5,7 +5,7 @@ import copy
 import cv2
 
 
-xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position_add_stroke_order.xml"
+xml_path = "../../../Data/Calligraphy_database/XML_dataset/dataset_add_ids_add_position_add_stroke_order_recorrect_add_true_post.xml"
 stroke_img_path = "../../../Data/Calligraphy_database/Stroke_pngs"
 template_folder_path = "../../../Data/Calligraphy_database/Chars_tempalte_library"
 
@@ -19,6 +19,9 @@ from character_synthesis_tool.template_matching_method import find_similar_basic
 
 from character_synthesis_tool.generate_template_folders import get_all_basic_radical_type_list, \
 get_char_bs_tag_and_stroke_ids_dict_list
+
+from character_synthesis_tool.merg_bs_stroke_images import get_basic_radicals_postion_dict, get_strokes_position_dict, \
+    merge_select_stroke_images
 
 # def character_synthesis(chars, root, template_folder_path, stroke_image_path):
 #     if root is None or chars == "" or not os.path.exists(template_folder_path):
@@ -262,7 +265,7 @@ get_char_bs_tag_and_stroke_ids_dict_list
 #
 #     return generated_results
 
-def character_synthesis_new(chars, root, template_folder_path, stroke_image_path):
+def character_synthesis(chars, root, template_folder_path, stroke_image_path):
     if root is None or chars == "" or not os.path.exists(template_folder_path):
         print("char or root or template folder path is none")
         return
@@ -279,19 +282,20 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
 
     # all stroke image names
     all_stroke_image_names = [f for f in os.listdir(stroke_image_path) if ".png" in f]
+    print("all stroke num: ", len(all_stroke_image_names))
 
     # reuslt
     generated_results = []
 
     for ch_obj in char_obj_list:
 
-        found_similar_stroke_ids = []
+        found_similar_stroke_ids = []   # use to identify sk ids in bs
 
         # find similar basic radical
         similar_basic_radical_dict = {}     # {'0': {'肫_月_0.png': 31.400000000000002, '肪_月_0.png': 32.8}}
         for bs_obj in ch_obj.basic_radicals:
-            bs_type = bs_obj.tag
-            print(bs_type)
+            bs_type = bs_obj.tag.strip()
+            print("bs type: {}".format(bs_type))
             bs_post = bs_obj.position
             bs_type_path = os.path.join(template_folder_path, "BasicRadicals", bs_type)
             if not os.path.exists(bs_type_path):
@@ -304,8 +308,6 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
             print(similar_bs_same_post_and_size_list)
             print("same post and size bs num:", len(similar_bs_same_post_and_size_list))
 
-            exit()
-
             if len(similar_bs_same_post_and_size_list) > 0:
                 print("find same post and size bs")
 
@@ -317,7 +319,7 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
 
             # not find similar bs with same post and size, need to find bs with same size
             similar_bs_same_size_list = find_similar_basic_radicals_img_names_with_same_size(
-                bs_post, bs_type_path, threshold=30)
+                bs_post, bs_type_path, threshold=10)
             if len(similar_bs_same_size_list) > 0:
                 print("find same size bs")
 
@@ -419,7 +421,7 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
                 continue
 
             similar_sk_same_post_and_size_list = find_similar_strokes_img_names_with_same_position_and_size(sk_post,
-                                                    sk_type_temp_path, threshold=20)
+                                                    sk_type_temp_path, threshold=10)
             if len(similar_sk_same_post_and_size_list) > 0:
                 print("find same post and size strokes")
                 similar_strokes_dict[sk_id] = similar_sk_same_post_and_size_list.copy()
@@ -428,7 +430,7 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
 
             # not find same post and size stroke, to find same size
             similar_sk_same_size_list = find_similar_strokes_img_names_with_same_size(sk_post,
-                                                    sk_type_temp_path, threshold=30)
+                                                    sk_type_temp_path, threshold=10)
             if len(similar_sk_same_size_list) > 0:
                 print("find same size strokes")
                 similar_strokes_dict[sk_id] = similar_sk_same_size_list.copy()
@@ -454,47 +456,12 @@ def character_synthesis_new(chars, root, template_folder_path, stroke_image_path
         print(ch_similar_sk_id_img_name_dict)
 
         # merge image
+        ch_stroke_position_dict = get_strokes_position_dict(root, ch)
+        print("{} stroke post dict: ".format(ch), ch_stroke_position_dict)
+
         bk = createBlankGrayscaleImageWithSize((500, 500))
-        offset_base = int(abs(500 - 256) / 2)
+        bk = merge_select_stroke_images(bk, ch_stroke_position_dict, ch_similar_sk_id_img_name_dict, stroke_image_path)
 
-        for sk_id in ch_similar_sk_id_img_name_dict:
-            # if sk_id != 6:
-            #     continue
-            img_name = ch_similar_sk_id_img_name_dict[sk_id]
-
-            sk_post = None
-            for sk_obj in ch_obj.strokes:
-                if sk_obj.id == str(sk_id):
-                    sk_post = sk_obj.position.copy()
-                    break
-            if sk_post is None:
-                continue
-            x0, y0, w0, h0 = sk_post[0], sk_post[1], sk_post[2], sk_post[3]
-
-            cent_x0 = int(x0 + w0 / 2)
-            cent_y0 = int(y0 + h0 / 2)
-
-            img = cv2.imread(os.path.join(stroke_image_path, img_name), 0)
-            x, y, w, h = getSingleMaxBoundingBoxOfImage(img)
-
-            cent_x = int(x + w / 2)
-            cent_y = int(y + h / 2)
-
-            offset_x = cent_x0 - cent_x + offset_base
-            offset_y = cent_y0 - cent_y + offset_base
-
-            for x in range(256):
-                for y in range(256):
-                    if img[x][y] == 0:
-                        if x + offset_x < 0 or x + offset_x >= 500 or y + offset_y < 0 and y + offset_y >= 500 or \
-                                x < 0 or x >= 500 or y < 0 or y >= 500:
-                            continue
-                        bk[x + offset_x][y + offset_y] = img[x][y]
-            print("show bk")
-            cv2.imshow("{}".format(ch_obj.tag), bk)
-
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
         generated_results.append(bk.copy())
 
     return generated_results
@@ -626,8 +593,14 @@ if __name__ == '__main__':
     # ch_obj = char_from_xml_to_obj(ch, root)
     # print(ch_obj.basic_radicals)
 
-    chars = "他"
+    chars = "付"
 
-    results = character_synthesis_new(chars, root, template_folder_path, stroke_img_path)
+    results = character_synthesis(chars, root, template_folder_path, stroke_img_path)
+
+    for i in range(len(results)):
+        cv2.imshow("{}".format(i), results[i])
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 
